@@ -39,6 +39,7 @@ export default function GroupCreate({ user, onCreated, onBack }) {
       const code = generateCode()
       const hashed = await hashPin(pin)
       const groupRef = doc(collection(db, 'groups'))
+      const displayToken = btoa(groupRef.id)
       await setDoc(groupRef, {
         name: name.trim().toUpperCase(),
         code,
@@ -48,6 +49,7 @@ export default function GroupCreate({ user, onCreated, onBack }) {
         deadline: new Date(deadline),
         memberCount: 1,
         members: [user.uid],
+        displayToken,
       })
       sessionStorage.setItem('gc_admin', '1')
       onCreated({ id: groupRef.id, name: name.trim().toUpperCase(), code, pinHash: hashed, deadline: new Date(deadline) })

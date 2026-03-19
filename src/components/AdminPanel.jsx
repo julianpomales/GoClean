@@ -8,7 +8,7 @@ import { db } from '../firebase'
 const inputCls = 'w-full bg-[var(--color-card-bg)] border border-slate-700 rounded-none px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-neon-green transition-colors placeholder-slate-600'
 const labelCls = 'font-mono text-[10px] uppercase tracking-widest text-slate-500 mb-2 block'
 
-export default function AdminPanel({ groupId, participants, entries, deadline, onLock }) {
+export default function AdminPanel({ groupId, group, participants, entries, deadline, onLock }) {
   const [activeTab, setActiveTab] = useState('log')
   const [selectedId, setSelectedId] = useState('')
   const [note, setNote] = useState('')
@@ -301,15 +301,48 @@ export default function AdminPanel({ groupId, participants, entries, deadline, o
           )}
 
           {activeTab === 'settings' && (
-            <motion.form key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onSubmit={saveDeadline} className="flex flex-col gap-6">
-              <div>
-                <label className={labelCls}>TARGET DATE</label>
-                <input type="datetime-local" value={newDeadline} onChange={e => setNewDeadline(e.target.value)} className={inputCls} />
-              </div>
-              <button type="submit" disabled={!newDeadline || deadlineLoading} className="btn-brutal w-full">
-                {deadlineLoading ? 'UPDATING...' : 'UPDATE SYSTEM PROTOCOL'}
-              </button>
-            </motion.form>
+            <motion.div key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col gap-8">
+
+              {/* TV Display URL */}
+              {(() => {
+                const token = group?.displayToken || btoa(groupId)
+                const displayUrl = `${window.location.origin}/display/${token}`
+                return (
+                  <div className="flex flex-col gap-3">
+                    <div className="font-mono text-[10px] uppercase tracking-widest text-slate-500 pb-2 border-b border-slate-800">
+                      TV DISPLAY LINK — NO LOGIN REQUIRED
+                    </div>
+                    <div className="flex items-stretch gap-3">
+                      <div className="flex-1 bg-[var(--color-deep-bg)] border border-slate-700 px-4 py-3 font-mono text-xs text-slate-400 truncate select-all">
+                        {displayUrl}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => navigator.clipboard.writeText(displayUrl)}
+                        className="btn-brutal shrink-0 text-xs px-4"
+                      >
+                        COPY
+                      </button>
+                    </div>
+                    <p className="font-mono text-[10px] text-slate-600">
+                      Open on any TV or display device. Shows pool, countdown, leaderboard &amp; recent activity. No account needed.
+                    </p>
+                  </div>
+                )
+              })()}
+
+              {/* Deadline */}
+              <form onSubmit={saveDeadline} className="flex flex-col gap-4">
+                <div>
+                  <label className={labelCls}>TARGET DATE</label>
+                  <input type="datetime-local" value={newDeadline} onChange={e => setNewDeadline(e.target.value)} className={inputCls} />
+                </div>
+                <button type="submit" disabled={!newDeadline || deadlineLoading} className="btn-brutal w-full">
+                  {deadlineLoading ? 'UPDATING...' : 'UPDATE SYSTEM PROTOCOL'}
+                </button>
+              </form>
+
+            </motion.div>
           )}
 
         </AnimatePresence>

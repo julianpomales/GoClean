@@ -367,6 +367,7 @@ function App() {
             {isAdmin && (
               <AdminPanel
                 groupId={activeGroup.id}
+                group={activeGroup}
                 participants={participants}
                 entries={entries}
                 deadline={deadline}
