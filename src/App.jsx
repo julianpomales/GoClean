@@ -293,8 +293,8 @@ function App() {
                 className="w-10 h-10 rounded-none border border-slate-800 group-hover:border-neon-green transition-colors grayscale group-hover:grayscale-0"
               />
             ) : (
-              <div className="w-10 h-10 bg-[var(--color-card-bg)] border border-slate-800 flex items-center justify-center font-mono text-xs text-slate-400 group-hover:text-neon-green group-hover:border-neon-green transition-colors">
-                ESC
+              <div className="w-10 h-10 bg-[var(--color-card-bg)] border border-slate-800 flex items-center justify-center font-display font-bold text-sm text-slate-400 group-hover:text-neon-green group-hover:border-neon-green transition-colors">
+                {(user.displayName || user.email || '?')[0].toUpperCase()}
               </div>
             )}
           </button>

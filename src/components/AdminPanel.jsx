@@ -234,7 +234,7 @@ export default function AdminPanel({ groupId, participants, entries, deadline, o
                   {/* Avatar */}
                   {p.photoURL
                     ? <img src={p.photoURL} alt={p.name} className="w-8 h-8 rounded-none border border-slate-700 grayscale shrink-0" />
-                    : <div className="w-8 h-8 border border-slate-700 flex items-center justify-center font-display text-sm text-slate-400 shrink-0">{p.name?.[0]?.toUpperCase()}</div>
+                    : <div className="w-8 h-8 border border-slate-700 bg-slate-800/50 flex items-center justify-center font-display font-bold text-sm text-slate-300 shrink-0">{p.name?.[0]?.toUpperCase() ?? '?'}</div>
                   }
 
                   {/* Name + stats */}
