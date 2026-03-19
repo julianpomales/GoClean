@@ -18,7 +18,7 @@ function AnimatedDollar({ value }) {
 
 export default function CashPool({ total }) {
   return (
-    <div className="flex flex-col items-center justify-center w-full h-full py-10">
+    <div className="flex flex-col items-center justify-center w-full h-full py-16 sm:py-20">
       <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500 mb-6">
         TOTAL POOL
       </p>
