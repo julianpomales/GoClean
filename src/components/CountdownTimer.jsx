@@ -3,15 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 function Digit({ value }) {
   return (
-    <div className="relative w-[52px] h-[72px] sm:w-[72px] sm:h-[96px] lg:w-[96px] lg:h-[120px] flex items-center justify-center overflow-hidden border border-slate-800 bg-[var(--color-deep-bg)]">
+    <div className="relative w-[34px] h-[50px] sm:w-[60px] sm:h-[80px] lg:w-[96px] lg:h-[120px] flex items-center justify-center overflow-hidden border border-slate-800 bg-[var(--color-deep-bg)]">
       <AnimatePresence mode="popLayout">
         <motion.span
           key={value}
-          initial={{ y: 28, opacity: 0 }}
+          initial={{ y: 16, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -28, opacity: 0 }}
+          exit={{ y: -16, opacity: 0 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="text-4xl sm:text-5xl lg:text-6xl font-mono text-white tracking-tighter absolute"
+          className="text-2xl sm:text-4xl lg:text-6xl font-mono text-white tracking-tighter absolute"
         >
           {value}
         </motion.span>
@@ -23,12 +23,12 @@ function Digit({ value }) {
 function TimeUnit({ value, label }) {
   const padded = String(value).padStart(2, '0')
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className="flex gap-2">
+    <div className="flex flex-col items-center gap-2 sm:gap-4">
+      <div className="flex gap-1 sm:gap-2">
         <Digit value={padded[0]} />
         <Digit value={padded[1]} />
       </div>
-      <span className="font-mono text-xs sm:text-sm uppercase tracking-widest text-slate-500">
+      <span className="font-mono text-[9px] sm:text-xs uppercase tracking-widest text-slate-500">
         {label}
       </span>
     </div>
@@ -37,7 +37,7 @@ function TimeUnit({ value, label }) {
 
 function Separator() {
   return (
-    <div className="flex flex-col items-center justify-center h-[72px] sm:h-[96px] lg:h-[120px]">
+    <div className="flex flex-col items-center justify-center h-[50px] sm:h-[80px] lg:h-[120px]">
       <div className="flex flex-col gap-2">
         <div className="w-1.5 h-1.5 bg-slate-700 rounded-full" />
         <div className="w-1.5 h-1.5 bg-slate-700 rounded-full" />
@@ -107,7 +107,7 @@ export default function CountdownTimer({ deadline }) {
       <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500">
         TIME REMAINING
       </p>
-      <div className="flex items-start gap-4 sm:gap-6 lg:gap-8">
+      <div className="flex items-start gap-2 sm:gap-5 lg:gap-8">
         <TimeUnit value={timeLeft.days} label="DAYS" />
         <Separator />
         <TimeUnit value={timeLeft.hours} label="HRS" />
