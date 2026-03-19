@@ -34,35 +34,38 @@ export default function EntryFeed({ entries }) {
 
       <div className="flex flex-col divide-y divide-slate-800/60 border border-slate-800/60">
         <AnimatePresence initial={false}>
-          {data.slice(0, 20).map((entry, i) => (
+          {data.slice(0, 20).map((entry, i) => {
+            const isLatest = i === 0
+            return (
             <motion.div
               key={entry.id}
               initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: isPlaceholder ? 0.35 : 1, y: 0 }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.25, delay: i * 0.03 }}
-              className="group flex items-center gap-4 px-5 h-[72px] bg-[var(--color-card-bg)] hover:bg-slate-900/60 transition-colors overflow-hidden"
+              className={`relative group flex items-center gap-4 px-5 h-[72px] bg-[var(--color-card-bg)] hover:bg-slate-900/60 transition-colors overflow-hidden border-l-2 ${isLatest ? 'border-red-500' : 'border-transparent'}`}
             >
+              {/* Bar fill */}
+              {isLatest && <div className="absolute inset-y-0 left-0 w-full bg-red-500/5" />}
+
               {/* Icon */}
-              <div className="w-7 h-7 shrink-0 flex items-center justify-center border border-red-500/20 bg-red-500/5 text-red-400 font-mono text-xs">
+              <div className="relative w-8 h-8 shrink-0 flex items-center justify-center border border-red-500/50 bg-red-500/10 text-red-400 font-mono text-sm font-bold">
                 !
               </div>
 
               {/* Name + note */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-baseline gap-2">
-                  <p className="font-display text-sm uppercase tracking-wide text-slate-200 truncate">{entry.participantName}</p>
-                  <span className="font-mono text-[10px] text-slate-600 shrink-0">{timeAgo(entry.createdAt)}</span>
-                </div>
-                {entry.note && (
-                  <p className="font-mono text-[10px] text-slate-500 mt-0.5 truncate">&ldquo;{entry.note}&rdquo;</p>
-                )}
+              <div className="relative flex-1 min-w-0">
+                <p className="font-display text-base uppercase tracking-wide text-white truncate">{entry.participantName}</p>
+                <p className="font-mono text-[10px] text-slate-600 mt-0.5 truncate">
+                  {entry.note ? `“${entry.note}”` : timeAgo(entry.createdAt)}
+                </p>
               </div>
 
               {/* Amount */}
-              <span className="font-mono text-sm font-bold text-red-400 shrink-0">+${(entry.amount || 0).toFixed(2)}</span>
+              <span className={`relative font-mono text-lg font-bold tracking-tight shrink-0 ${isLatest ? 'text-red-400' : 'text-slate-400'}`}>+${(entry.amount || 0).toFixed(2)}</span>
             </motion.div>
-          ))}
+            )
+          })}
         </AnimatePresence>
       </div>
     </div>
