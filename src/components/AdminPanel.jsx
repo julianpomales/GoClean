@@ -17,6 +17,9 @@ export default function AdminPanel({ groupId, participants, entries, deadline, o
   const [newName, setNewName] = useState('')
   const [newRate, setNewRate] = useState('1')
   const [addLoading, setAddLoading] = useState(false)
+  const [guestName, setGuestName] = useState('')
+  const [guestRate, setGuestRate] = useState('1')
+  const [guestLoading, setGuestLoading] = useState(false)
   const [editRates, setEditRates] = useState({})
   const [newDeadline, setNewDeadline] = useState(
     deadline
@@ -63,6 +66,22 @@ export default function AdminPanel({ groupId, participants, entries, deadline, o
     setNewName('')
     setNewRate('1')
     setAddLoading(false)
+  }
+
+  const addGuest = async (e) => {
+    e.preventDefault()
+    if (!guestName.trim()) return
+    setGuestLoading(true)
+    await addDoc(collection(db, 'groups', groupId, 'participants'), {
+      name: guestName.trim(),
+      rate: parseFloat(guestRate) || 1,
+      totalOwed: 0,
+      swearCount: 0,
+      isGuest: true,
+    })
+    setGuestName('')
+    setGuestRate('1')
+    setGuestLoading(false)
   }
 
   const removeParticipant = async (id) => {
@@ -172,7 +191,41 @@ export default function AdminPanel({ groupId, participants, entries, deadline, o
           )}
 
           {activeTab === 'people' && (
-            <motion.div key="people" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col gap-3">
+            <motion.div key="people" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col gap-6">
+
+              {/* Add guest */}
+              <div className="flex flex-col gap-3">
+                <div className="font-mono text-[10px] uppercase tracking-widest text-slate-500 pb-2 border-b border-slate-800">
+                  ADD GUEST — NO ACCOUNT REQUIRED
+                </div>
+                <form onSubmit={addGuest} className="flex gap-3">
+                  <input
+                    type="text"
+                    value={guestName}
+                    onChange={e => setGuestName(e.target.value)}
+                    placeholder="GUEST NAME"
+                    className={`${inputCls} flex-1`}
+                  />
+                  <div className="relative w-28 shrink-0">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-slate-500 text-sm">$</span>
+                    <input
+                      type="number"
+                      value={guestRate}
+                      onChange={e => setGuestRate(e.target.value)}
+                      min="0.25" step="0.25"
+                      className={`${inputCls} !pl-8`}
+                    />
+                  </div>
+                  <button type="submit" disabled={!guestName.trim() || guestLoading} className="btn-brutal whitespace-nowrap shrink-0">
+                    {guestLoading ? '...' : 'ADD GUEST'}
+                  </button>
+                </form>
+                <p className="font-mono text-[10px] text-slate-600">
+                  When a guest joins with a matching name, they’ll be prompted to merge their record with their account.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3">
               <div className="font-mono text-[10px] uppercase tracking-widest text-slate-500 pb-2 border-b border-slate-800">
                 ROSTER — SET RATE PER INFRACTION
               </div>
@@ -223,6 +276,7 @@ export default function AdminPanel({ groupId, participants, entries, deadline, o
               {participants.length === 0 && (
                 <p className="font-mono text-xs text-center text-slate-600 py-8">[ MEMBERS WILL APPEAR WHEN THEY JOIN THE GROUP ]</p>
               )}
+              </div>
             </motion.div>
           )}
 

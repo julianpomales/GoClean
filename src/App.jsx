@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { collection, doc, onSnapshot, orderBy, query, getDocs, where, setDoc, getDoc } from 'firebase/firestore'
+import { collection, doc, onSnapshot, orderBy, query, getDocs, where, setDoc, getDoc, deleteDoc, updateDoc, writeBatch } from 'firebase/firestore'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { db, auth } from './firebase'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -33,6 +33,7 @@ function App() {
   const [showPinModal, setShowPinModal] = useState(false)
   const [confettiTrigger, setConfettiTrigger] = useState(0)
   const prevEntriesCount = useRef(0)
+  const [mergeCandidate, setMergeCandidate] = useState(null) // { guestId, guestData }
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (firebaseUser) => {
@@ -61,25 +62,81 @@ function App() {
 
   const upsertParticipant = async (groupId) => {
     if (!user) return
+    const myName = user.displayName || user.email.split('@')[0]
     const ref = doc(db, 'groups', groupId, 'participants', user.uid)
     const snap = await getDoc(ref)
     if (!snap.exists()) {
-      await setDoc(ref, {
-        uid: user.uid,
-        name: user.displayName || user.email.split('@')[0],
-        photoURL: user.photoURL || null,
-        email: user.email,
-        rate: 1,
-        totalOwed: 0,
-        swearCount: 0,
+      // Check for a guest doc with the same name (case-insensitive)
+      const allSnap = await getDocs(collection(db, 'groups', groupId, 'participants'))
+      const guest = allSnap.docs.find(d => {
+        const data = d.data()
+        return !data.uid && data.name?.toLowerCase() === myName.toLowerCase()
       })
+      if (guest) {
+        // Prompt merge — don't write yet, let user confirm
+        setMergeCandidate({ guestId: guest.id, guestData: guest.data(), groupId, myName })
+      } else {
+        await setDoc(ref, {
+          uid: user.uid,
+          name: myName,
+          photoURL: user.photoURL || null,
+          email: user.email,
+          rate: 1,
+          totalOwed: 0,
+          swearCount: 0,
+        })
+      }
     } else {
       await setDoc(ref, {
-        name: user.displayName || user.email.split('@')[0],
+        name: myName,
         photoURL: user.photoURL || null,
         email: user.email,
       }, { merge: true })
     }
+  }
+
+  const handleMergeConfirm = async () => {
+    if (!mergeCandidate || !user) return
+    const { guestId, guestData, groupId, myName } = mergeCandidate
+    const batch = writeBatch(db)
+    // Create real account doc inheriting guest stats
+    const realRef = doc(db, 'groups', groupId, 'participants', user.uid)
+    batch.set(realRef, {
+      uid: user.uid,
+      name: myName,
+      photoURL: user.photoURL || null,
+      email: user.email,
+      rate: guestData.rate || 1,
+      totalOwed: guestData.totalOwed || 0,
+      swearCount: guestData.swearCount || 0,
+    })
+    // Re-point all entries that referenced the guest to the real uid
+    const entriesSnap = await getDocs(collection(db, 'groups', groupId, 'entries'))
+    entriesSnap.docs.forEach(d => {
+      if (d.data().participantId === guestId) {
+        batch.update(d.ref, { participantId: user.uid, participantName: myName })
+      }
+    })
+    // Delete guest doc
+    batch.delete(doc(db, 'groups', groupId, 'participants', guestId))
+    await batch.commit()
+    setMergeCandidate(null)
+  }
+
+  const handleMergeSkip = async () => {
+    if (!mergeCandidate || !user) return
+    const { groupId, myName } = mergeCandidate
+    const ref = doc(db, 'groups', groupId, 'participants', user.uid)
+    await setDoc(ref, {
+      uid: user.uid,
+      name: myName,
+      photoURL: user.photoURL || null,
+      email: user.email,
+      rate: 1,
+      totalOwed: 0,
+      swearCount: 0,
+    })
+    setMergeCandidate(null)
   }
 
   // Subscribe to participants — separate from entries so index errors don't affect it
@@ -259,6 +316,46 @@ function App() {
               <CountdownTimer deadline={deadline} />
             </div>
           </div>
+
+          {/* ── Merge prompt ── */}
+          <AnimatePresence>
+            {mergeCandidate && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 px-6"
+              >
+                <motion.div
+                  initial={{ scale: 0.95, y: 16 }}
+                  animate={{ scale: 1, y: 0 }}
+                  exit={{ scale: 0.95, y: 16 }}
+                  className="w-full max-w-md bg-[var(--color-card-bg)] border border-neon-green/40 p-8 flex flex-col gap-6"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse" />
+                    <span className="font-mono text-xs text-neon-green uppercase tracking-widest">ACCOUNT MATCH DETECTED</span>
+                  </div>
+                  <div>
+                    <p className="font-display text-white text-lg uppercase tracking-wide">
+                      A guest named <span className="text-neon-green">&ldquo;{mergeCandidate.guestData.name}&rdquo;</span> already exists in this group.
+                    </p>
+                    <p className="font-mono text-xs text-slate-500 mt-3">
+                      Merge to inherit their record: {mergeCandidate.guestData.swearCount || 0} infractions · ${(mergeCandidate.guestData.totalOwed || 0).toFixed(2)} owed · ${(mergeCandidate.guestData.rate || 1).toFixed(2)}/infraction rate
+                    </p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button onClick={handleMergeConfirm} className="btn-brutal flex-1">
+                      MERGE — THAT'S ME
+                    </button>
+                    <button onClick={handleMergeSkip} className="flex-1 font-mono text-xs uppercase tracking-widest text-slate-500 hover:text-white border border-slate-700 hover:border-slate-500 transition-colors px-4 py-3">
+                      NOT ME
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* ── Log infraction — all users ── */}
           <LogInfraction groupId={activeGroup.id} participants={participants} />
