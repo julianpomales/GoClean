@@ -22,23 +22,12 @@ export default function CashPool({ total }) {
       <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500 mb-6">
         TOTAL POOL
       </p>
-      <div className="flex items-baseline gap-3">
-        <span className="text-neon-green text-3xl sm:text-4xl font-mono leading-none select-none pb-2">$</span>
+      <div className="flex items-center gap-3">
+        <span className="text-neon-green text-[6rem] sm:text-[9rem] lg:text-[11rem] font-mono font-bold leading-none select-none">$</span>
         <span className="text-[6rem] sm:text-[9rem] lg:text-[11rem] font-mono font-bold leading-none tracking-tighter text-white">
           <AnimatedDollar value={total} />
         </span>
       </div>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.5 }}
-        className="mt-6 flex items-center gap-2"
-      >
-        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${total > 0 ? 'bg-red-400 animate-pulse' : 'bg-slate-700'}`} />
-        <p className="font-mono text-[10px] uppercase tracking-widest text-slate-500">
-          {total > 0 ? 'FUNDS ACCUMULATING' : 'NO INFRACTIONS YET'}
-        </p>
-      </motion.div>
     </div>
   )
 }
