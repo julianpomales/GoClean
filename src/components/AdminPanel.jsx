@@ -8,7 +8,7 @@ import { db } from '../firebase'
 const inputCls = 'w-full bg-[var(--color-card-bg)] border border-slate-700 rounded-none px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-neon-green transition-colors placeholder-slate-600'
 const labelCls = 'font-mono text-[10px] uppercase tracking-widest text-slate-500 mb-2 block'
 
-export default function AdminPanel({ participants, entries, deadline, onLock }) {
+export default function AdminPanel({ groupId, participants, entries, deadline, onLock }) {
   const [activeTab, setActiveTab] = useState('log')
   const [selectedId, setSelectedId] = useState('')
   const [note, setNote] = useState('')
@@ -33,14 +33,14 @@ export default function AdminPanel({ participants, entries, deadline, onLock }) 
     const participant = participants.find(p => p.id === selectedId)
     if (!participant) { setLogLoading(false); return }
     const amount = participant.rate || 1
-    await addDoc(collection(db, 'entries'), {
+    await addDoc(collection(db, 'groups', groupId, 'entries'), {
       participantId: selectedId,
       participantName: participant.name,
       amount,
       note: note.trim(),
       createdAt: serverTimestamp(),
     })
-    await updateDoc(doc(db, 'participants', selectedId), {
+    await updateDoc(doc(db, 'groups', groupId, 'participants', selectedId), {
       totalOwed: (participant.totalOwed || 0) + amount,
       swearCount: (participant.swearCount || 0) + 1,
     })
@@ -54,7 +54,7 @@ export default function AdminPanel({ participants, entries, deadline, onLock }) 
     e.preventDefault()
     if (!newName.trim()) return
     setAddLoading(true)
-    await addDoc(collection(db, 'participants'), {
+    await addDoc(collection(db, 'groups', groupId, 'participants'), {
       name: newName.trim(),
       rate: parseFloat(newRate) || 1,
       totalOwed: 0,
@@ -67,23 +67,23 @@ export default function AdminPanel({ participants, entries, deadline, onLock }) 
 
   const removeParticipant = async (id) => {
     if (!confirm('Remove this participant and their entries?')) return
-    await deleteDoc(doc(db, 'participants', id))
+    await deleteDoc(doc(db, 'groups', groupId, 'participants', id))
     const toDelete = entries.filter(e => e.participantId === id)
-    await Promise.all(toDelete.map(e => deleteDoc(doc(db, 'entries', e.id))))
+    await Promise.all(toDelete.map(e => deleteDoc(doc(db, 'groups', groupId, 'entries', e.id))))
   }
 
   const saveRate = async (id) => {
     const rate = parseFloat(editRates[id])
     if (isNaN(rate) || rate <= 0) return
-    await updateDoc(doc(db, 'participants', id), { rate })
+    await updateDoc(doc(db, 'groups', groupId, 'participants', id), { rate })
     setEditRates(prev => { const n = { ...prev }; delete n[id]; return n })
   }
 
   const deleteEntry = async (entry) => {
     const participant = participants.find(p => p.id === entry.participantId)
-    await deleteDoc(doc(db, 'entries', entry.id))
+    await deleteDoc(doc(db, 'groups', groupId, 'entries', entry.id))
     if (participant) {
-      await updateDoc(doc(db, 'participants', entry.participantId), {
+      await updateDoc(doc(db, 'groups', groupId, 'participants', entry.participantId), {
         totalOwed: Math.max(0, (participant.totalOwed || 0) - entry.amount),
         swearCount: Math.max(0, (participant.swearCount || 0) - 1),
       })
@@ -95,7 +95,7 @@ export default function AdminPanel({ participants, entries, deadline, onLock }) 
     if (!newDeadline) return
     setDeadlineLoading(true)
     const ts = Timestamp.fromDate(new Date(newDeadline))
-    await setDoc(doc(db, 'settings', 'config'), { deadline: ts }, { merge: true })
+    await setDoc(doc(db, 'groups', groupId), { deadline: ts }, { merge: true })
     setDeadlineLoading(false)
   }
 

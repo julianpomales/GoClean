@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
-import { db } from '../firebase'
 
 async function hashPin(pin) {
   const encoder = new TextEncoder()
@@ -11,7 +9,7 @@ async function hashPin(pin) {
   return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
 }
 
-export default function PinModal({ onSuccess, onClose, hasPin }) {
+export default function PinModal({ onSuccess, onClose, pinHash }) {
   const [pin, setPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
   const [error, setError] = useState('')
@@ -27,27 +25,14 @@ export default function PinModal({ onSuccess, onClose, hasPin }) {
     e.preventDefault()
     setError('')
     setLoading(true)
-
     try {
-      if (!hasPin) {
-        if (pin.length < 4) { setError('PIN must be at least 4 digits'); triggerShake(); setLoading(false); return }
-        if (pin !== confirmPin) { setError('PINs do not match'); triggerShake(); setLoading(false); return }
-        const hashed = await hashPin(pin)
-        await setDoc(doc(db, 'settings', 'config'), { pinHash: hashed }, { merge: true })
-        sessionStorage.setItem('gc_admin', '1')
+      const hashed = await hashPin(pin)
+      if (hashed === pinHash) {
         onSuccess()
       } else {
-        const snap = await getDoc(doc(db, 'settings', 'config'))
-        const stored = snap.data()?.pinHash
-        const hashed = await hashPin(pin)
-        if (hashed === stored) {
-          sessionStorage.setItem('gc_admin', '1')
-          onSuccess()
-        } else {
-          setError('Incorrect PIN')
-          triggerShake()
-          setPin('')
-        }
+        setError('Incorrect PIN')
+        triggerShake()
+        setPin('')
       }
     } catch (err) {
       setError('Something went wrong. Try again.')
@@ -79,22 +64,18 @@ export default function PinModal({ onSuccess, onClose, hasPin }) {
         >
           <div className="text-center mb-8">
             <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">{hasPin ? '🔐' : '🛡️'}</span>
+              <span className="text-2xl">🔐</span>
             </div>
-            <h2 className="text-white font-bold text-lg">
-              {hasPin ? 'Enter Admin PIN' : 'Create Admin PIN'}
-            </h2>
+            <h2 className="text-white font-bold text-lg">Enter Admin PIN</h2>
             <p className="text-slate-500 text-sm mt-1.5 leading-relaxed">
-              {hasPin
-                ? 'Enter your PIN to unlock admin controls'
-                : 'You\'re the first here! Set a PIN to manage this group.'}
+              Enter your PIN to unlock admin controls
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
               <label className="text-[10px] uppercase tracking-[0.15em] text-slate-500 font-semibold mb-2 block">
-                {hasPin ? 'PIN' : 'Choose a PIN (min. 4 digits)'}
+                PIN
               </label>
               <input
                 type="password"
@@ -106,22 +87,6 @@ export default function PinModal({ onSuccess, onClose, hasPin }) {
                 autoFocus
               />
             </div>
-
-            {!hasPin && (
-              <div>
-                <label className="text-[10px] uppercase tracking-[0.15em] text-slate-500 font-semibold mb-2 block">
-                  Confirm PIN
-                </label>
-                <input
-                  type="password"
-                  inputMode="numeric"
-                  value={confirmPin}
-                  onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                  className={inputClasses}
-                  placeholder="••••"
-                />
-              </div>
-            )}
 
             <AnimatePresence>
               {error && (
@@ -146,7 +111,7 @@ export default function PinModal({ onSuccess, onClose, hasPin }) {
                   <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
                   Verifying...
                 </span>
-              ) : hasPin ? 'Unlock' : 'Set PIN & Enter'}
+              ) : 'Unlock'}
             </button>
 
             <button

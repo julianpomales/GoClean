@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { collection, doc, onSnapshot, orderBy, query } from 'firebase/firestore'
+import { collection, doc, onSnapshot, orderBy, query, getDocs, where } from 'firebase/firestore'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { db, auth } from './firebase'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -10,40 +10,62 @@ import EntryFeed from './components/EntryFeed'
 import AdminPanel from './components/AdminPanel'
 import PinModal from './components/PinModal'
 import Confetti from './components/Confetti'
-import SetupScreen from './components/SetupScreen'
 import LandingPage from './components/LandingPage'
+import GroupHub from './components/GroupHub'
+import GroupCreate from './components/GroupCreate'
+import GroupJoin from './components/GroupJoin'
 
 function App() {
   const [user, setUser] = useState(null)
   const [authLoading, setAuthLoading] = useState(true)
+
+  // Group state
+  const [screen, setScreen] = useState('hub') // hub | create | join | dashboard
+  const [activeGroup, setActiveGroup] = useState(null)
+  const [userGroups, setUserGroups] = useState([])
+  const [groupsLoading, setGroupsLoading] = useState(false)
+
+  // Dashboard state
   const [participants, setParticipants] = useState([])
   const [entries, setEntries] = useState([])
-  const [deadline, setDeadline] = useState(null)
-  const [hasPin, setHasPin] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(() => sessionStorage.getItem('gc_admin') === '1')
+  const [isAdmin, setIsAdmin] = useState(false)
   const [showPinModal, setShowPinModal] = useState(false)
   const [confettiTrigger, setConfettiTrigger] = useState(0)
-  const [settingsLoaded, setSettingsLoaded] = useState(false)
   const prevEntriesCount = useRef(0)
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser)
       setAuthLoading(false)
+      if (!firebaseUser) {
+        setActiveGroup(null)
+        setScreen('hub')
+        setIsAdmin(false)
+      }
     })
     return unsub
   }, [])
 
+  // Load user's groups when logged in
   useEffect(() => {
-    const unsub = onSnapshot(collection(db, 'participants'), snap => {
+    if (!user) { setUserGroups([]); return }
+    setGroupsLoading(true)
+    const q = query(collection(db, 'groups'), where('members', 'array-contains', user.uid))
+    const unsub = onSnapshot(q, snap => {
+      setUserGroups(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+      setGroupsLoading(false)
+    })
+    return unsub
+  }, [user])
+
+  // Subscribe to group's participants and entries when activeGroup is set
+  useEffect(() => {
+    if (!activeGroup) return
+    const pUnsub = onSnapshot(collection(db, 'groups', activeGroup.id, 'participants'), snap => {
       setParticipants(snap.docs.map(d => ({ id: d.id, ...d.data() })))
     })
-    return unsub
-  }, [])
-
-  useEffect(() => {
-    const q = query(collection(db, 'entries'), orderBy('createdAt', 'desc'))
-    const unsub = onSnapshot(q, snap => {
+    const q = query(collection(db, 'groups', activeGroup.id, 'entries'), orderBy('createdAt', 'desc'))
+    const eUnsub = onSnapshot(q, snap => {
       const newEntries = snap.docs.map(d => ({ id: d.id, ...d.data() }))
       if (prevEntriesCount.current > 0 && newEntries.length > prevEntriesCount.current) {
         setConfettiTrigger(t => t + 1)
@@ -51,40 +73,44 @@ function App() {
       prevEntriesCount.current = newEntries.length
       setEntries(newEntries)
     })
-    return unsub
-  }, [])
+    return () => { pUnsub(); eUnsub() }
+  }, [activeGroup])
 
-  useEffect(() => {
-    const unsub = onSnapshot(doc(db, 'settings', 'config'), snap => {
-      if (snap.exists()) {
-        const data = snap.data()
-        setDeadline(data.deadline || null)
-        setHasPin(!!data.pinHash)
-      }
-      setSettingsLoaded(true)
-    })
-    return unsub
-  }, [])
-
-  const totalPool = participants.reduce((sum, p) => sum + (p.totalOwed || 0), 0)
-
-  const handleAdminClick = () => {
-    if (isAdmin) return
-    setShowPinModal(true)
+  const handleSelectGroup = (group) => {
+    setActiveGroup(group)
+    setIsAdmin(false)
+    setScreen('dashboard')
   }
 
-  const handleLock = () => {
-    sessionStorage.removeItem('gc_admin')
+  const handleGroupCreated = (group) => {
+    setActiveGroup(group)
+    setIsAdmin(true)
+    setScreen('dashboard')
+  }
+
+  const handleGroupJoined = (group) => {
+    setActiveGroup(group)
     setIsAdmin(false)
+    setScreen('dashboard')
+  }
+
+  const handleLock = () => setIsAdmin(false)
+
+  const handleLeaveGroup = () => {
+    setActiveGroup(null)
+    setParticipants([])
+    setEntries([])
+    setIsAdmin(false)
+    setScreen('hub')
   }
 
   const handleSignOut = async () => {
-    sessionStorage.removeItem('gc_admin')
+    setActiveGroup(null)
     setIsAdmin(false)
     await signOut(auth)
   }
 
-  if (authLoading || !settingsLoaded) {
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-grain flex items-center justify-center">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center gap-6">
@@ -95,13 +121,31 @@ function App() {
     )
   }
 
-  if (!user) {
-    return <LandingPage />
+  if (!user) return <LandingPage />
+
+  if (screen === 'create') {
+    return <GroupCreate user={user} onCreated={handleGroupCreated} onBack={() => setScreen('hub')} />
   }
 
-  if (!hasPin) {
-    return <SetupScreen onComplete={() => {}} />
+  if (screen === 'join') {
+    return <GroupJoin user={user} onJoined={handleGroupJoined} onBack={() => setScreen('hub')} />
   }
+
+  if (screen === 'hub' || !activeGroup) {
+    return (
+      <GroupHub
+        user={user}
+        groups={userGroups}
+        onSelect={handleSelectGroup}
+        onCreateNew={() => setScreen('create')}
+        onJoinExisting={() => setScreen('join')}
+      />
+    )
+  }
+
+  // Dashboard
+  const totalPool = participants.reduce((sum, p) => sum + (p.totalOwed || 0), 0)
+  const deadline = activeGroup.deadline
 
   return (
     <div className="min-h-screen bg-grain text-slate-200 font-sans selection:bg-neon-green selection:text-black flex flex-col">
@@ -110,7 +154,8 @@ function App() {
       <AnimatePresence>
         {showPinModal && (
           <PinModal
-            hasPin={hasPin}
+            groupId={activeGroup.id}
+            pinHash={activeGroup.pinHash}
             onSuccess={() => { setIsAdmin(true); setShowPinModal(false) }}
             onClose={() => setShowPinModal(false)}
           />
@@ -124,19 +169,24 @@ function App() {
       </div>
 
       {/* Header */}
-      <header className="relative z-40 w-full py-8 px-6 sm:px-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <header className="relative z-40 w-full py-6 px-6 sm:px-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <span className="text-3xl hidden sm:block">🧼</span>
+          <button onClick={handleLeaveGroup} className="font-mono text-[10px] text-slate-600 hover:text-white transition-colors uppercase tracking-widest shrink-0">
+            ← GROUPS
+          </button>
+          <div className="w-px h-6 bg-slate-800" />
           <div>
-            <h1 className="font-display font-black text-2xl tracking-tight uppercase leading-none">GOCLEAN</h1>
-            <p className="font-mono text-[10px] uppercase tracking-widest text-slate-500 mt-2">
-              OPERATOR: {user.displayName || user.email}
+            <h1 className="font-display font-black text-xl tracking-tight uppercase leading-none text-white">
+              {activeGroup.name}
+            </h1>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-slate-500 mt-1">
+              CODE: {activeGroup.code} &nbsp;·&nbsp; {user.displayName || user.email}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end border-t border-slate-800/50 sm:border-0 pt-4 sm:pt-0">
           <button
-            onClick={handleAdminClick}
+            onClick={() => { if (!isAdmin) setShowPinModal(true) }}
             className={`font-mono text-xs uppercase tracking-widest transition-colors ${
               isAdmin ? 'text-neon-green' : 'text-slate-500 hover:text-white'
             }`}
@@ -161,58 +211,44 @@ function App() {
 
       <main className="relative z-10 flex-1 w-full py-4">
         <div className="w-full max-w-5xl mx-auto px-6 sm:px-12 flex flex-col gap-12">
-        {/* Hero: Cash Pool + Countdown */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-slate-800/50 border border-slate-800/80 p-px">
-          <div className="bg-[var(--color-card-bg)] p-8 sm:p-12 relative overflow-hidden group">
-            <div className="absolute top-4 left-4 w-2 h-2 bg-neon-green rounded-full animate-pulse" />
-            <CashPool total={totalPool} />
+          {/* Hero: Cash Pool + Countdown */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-slate-800/50 border border-slate-800/80 p-px">
+            <div className="bg-[var(--color-card-bg)] p-8 sm:p-12 relative overflow-hidden group">
+              <div className="absolute top-4 left-4 w-2 h-2 bg-neon-green rounded-full animate-pulse" />
+              <CashPool total={totalPool} />
+            </div>
+            <div className="bg-[var(--color-card-bg)] p-8 sm:p-12 flex items-center justify-center">
+              <CountdownTimer deadline={deadline} />
+            </div>
           </div>
-          <div className="bg-[var(--color-card-bg)] p-8 sm:p-12 flex items-center justify-center">
-            <CountdownTimer deadline={deadline} />
+
+          {/* Admin Panel */}
+          <AnimatePresence>
+            {isAdmin && (
+              <AdminPanel
+                groupId={activeGroup.id}
+                participants={participants}
+                entries={entries}
+                deadline={deadline}
+                onLock={handleLock}
+              />
+            )}
+          </AnimatePresence>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start">
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.6 }}>
+              <Leaderboard participants={participants} />
+            </motion.div>
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.6 }}>
+              <EntryFeed entries={entries} />
+            </motion.div>
           </div>
-        </div>
-
-        {/* Admin Panel */}
-        <AnimatePresence>
-          {isAdmin && (
-            <AdminPanel
-              participants={participants}
-              entries={entries}
-              deadline={deadline}
-              onLock={handleLock}
-            />
-          )}
-        </AnimatePresence>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start mt-4">
-          {/* Leaderboard */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.6 }}
-          >
-            <Leaderboard participants={participants} />
-          </motion.div>
-
-          {/* Entry Feed */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15, duration: 0.6 }}
-          >
-            <EntryFeed entries={entries} />
-          </motion.div>
-        </div>
         </div>
       </main>
 
       <footer className="relative z-10 w-full py-8 px-6 sm:px-12 flex items-center justify-between border-t border-slate-800/50 mt-10 sm:mt-20">
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
-          GOCLEAN VERSION 1.0.0
-        </span>
-        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
-          KEEP IT CLEAN 🧼
-        </span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">GOCLEAN VERSION 2.0.0</span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">KEEP IT CLEAN 🧼</span>
       </footer>
     </div>
   )
