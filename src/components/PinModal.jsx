@@ -16,6 +16,12 @@ export default function PinModal({ onSuccess, onClose, hasPin }) {
   const [confirmPin, setConfirmPin] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [shake, setShake] = useState(false)
+
+  const triggerShake = () => {
+    setShake(true)
+    setTimeout(() => setShake(false), 500)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -24,8 +30,8 @@ export default function PinModal({ onSuccess, onClose, hasPin }) {
 
     try {
       if (!hasPin) {
-        if (pin.length < 4) { setError('PIN must be at least 4 digits'); setLoading(false); return }
-        if (pin !== confirmPin) { setError('PINs do not match'); setLoading(false); return }
+        if (pin.length < 4) { setError('PIN must be at least 4 digits'); triggerShake(); setLoading(false); return }
+        if (pin !== confirmPin) { setError('PINs do not match'); triggerShake(); setLoading(false); return }
         const hashed = await hashPin(pin)
         await setDoc(doc(db, 'settings', 'config'), { pinHash: hashed }, { merge: true })
         sessionStorage.setItem('gc_admin', '1')
@@ -39,6 +45,8 @@ export default function PinModal({ onSuccess, onClose, hasPin }) {
           onSuccess()
         } else {
           setError('Incorrect PIN')
+          triggerShake()
+          setPin('')
         }
       }
     } catch (err) {
@@ -47,43 +55,53 @@ export default function PinModal({ onSuccess, onClose, hasPin }) {
     setLoading(false)
   }
 
+  const inputClasses = 'w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3.5 text-white text-center text-2xl tracking-[0.3em] focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.05] transition-all duration-200 placeholder-white/10'
+
   return (
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md"
         onClick={(e) => e.target === e.currentTarget && onClose()}
       >
         <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-          className="bg-slate-900 border border-slate-700 rounded-2xl p-8 w-full max-w-sm mx-4 shadow-2xl"
+          initial={{ scale: 0.95, opacity: 0, y: 10 }}
+          animate={{
+            scale: 1, opacity: 1, y: 0,
+            x: shake ? [0, -8, 8, -8, 8, 0] : 0,
+          }}
+          exit={{ scale: 0.95, opacity: 0, y: 10 }}
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          className="glass rounded-3xl p-8 w-full max-w-sm mx-4 shadow-2xl shadow-black/40"
         >
-          <div className="text-center mb-6">
-            <span className="text-4xl">🔐</span>
-            <h2 className="text-white text-xl font-bold mt-2">
-              {hasPin ? 'Admin Access' : 'Create Admin PIN'}
+          <div className="text-center mb-8">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl">{hasPin ? '🔐' : '🛡️'}</span>
+            </div>
+            <h2 className="text-white font-bold text-lg">
+              {hasPin ? 'Enter Admin PIN' : 'Create Admin PIN'}
             </h2>
-            <p className="text-slate-400 text-sm mt-1">
-              {hasPin ? 'Enter your PIN to access admin controls' : 'Set a PIN to protect admin controls'}
+            <p className="text-slate-500 text-sm mt-1.5 leading-relaxed">
+              {hasPin
+                ? 'Enter your PIN to unlock admin controls'
+                : 'You\'re the first here! Set a PIN to manage this group.'}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
-              <label className="text-slate-400 text-xs uppercase tracking-wider mb-1 block">
-                {hasPin ? 'PIN' : 'New PIN (min. 4 digits)'}
+              <label className="text-[10px] uppercase tracking-[0.15em] text-slate-500 font-semibold mb-2 block">
+                {hasPin ? 'PIN' : 'Choose a PIN (min. 4 digits)'}
               </label>
               <input
                 type="password"
                 inputMode="numeric"
                 value={pin}
                 onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-white text-center text-2xl tracking-widest focus:outline-none focus:border-emerald-500 transition-colors"
+                className={inputClasses}
                 placeholder="••••"
                 autoFocus
               />
@@ -91,7 +109,7 @@ export default function PinModal({ onSuccess, onClose, hasPin }) {
 
             {!hasPin && (
               <div>
-                <label className="text-slate-400 text-xs uppercase tracking-wider mb-1 block">
+                <label className="text-[10px] uppercase tracking-[0.15em] text-slate-500 font-semibold mb-2 block">
                   Confirm PIN
                 </label>
                 <input
@@ -99,34 +117,42 @@ export default function PinModal({ onSuccess, onClose, hasPin }) {
                   inputMode="numeric"
                   value={confirmPin}
                   onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-white text-center text-2xl tracking-widest focus:outline-none focus:border-emerald-500 transition-colors"
+                  className={inputClasses}
                   placeholder="••••"
                 />
               </div>
             )}
 
-            {error && (
-              <motion.p
-                initial={{ opacity: 0, y: -5 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-red-400 text-sm text-center"
-              >
-                {error}
-              </motion.p>
-            )}
+            <AnimatePresence>
+              {error && (
+                <motion.p
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="text-red-400/90 text-sm text-center"
+                >
+                  {error}
+                </motion.p>
+              )}
+            </AnimatePresence>
 
             <button
               type="submit"
               disabled={loading || pin.length < 4}
-              className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold py-3 rounded-xl transition-colors"
+              className="mt-2 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 disabled:from-white/5 disabled:to-white/5 disabled:text-white/20 text-white font-bold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/10 disabled:shadow-none"
             >
-              {loading ? 'Verifying...' : hasPin ? 'Unlock' : 'Set PIN & Enter'}
+              {loading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                  Verifying...
+                </span>
+              ) : hasPin ? 'Unlock' : 'Set PIN & Enter'}
             </button>
 
             <button
               type="button"
               onClick={onClose}
-              className="text-slate-500 hover:text-slate-300 text-sm transition-colors"
+              className="text-slate-600 hover:text-slate-400 text-sm transition-colors"
             >
               Cancel
             </button>

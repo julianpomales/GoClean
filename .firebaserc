@@ -1,5 +1,7 @@
 {
   "projects": {
     "default": "goclean-swearjar"
-  }
+  },
+  "targets": {},
+  "etags": {}
 }

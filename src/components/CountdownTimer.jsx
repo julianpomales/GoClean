@@ -1,22 +1,40 @@
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 function TimeUnit({ value, label }) {
   return (
-    <motion.div
-      key={value}
-      initial={{ rotateX: -90, opacity: 0 }}
-      animate={{ rotateX: 0, opacity: 1 }}
-      transition={{ duration: 0.3 }}
-      className="flex flex-col items-center"
-    >
-      <div className="bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 min-w-[70px] text-center shadow-lg">
-        <span className="text-3xl md:text-4xl font-black text-white tabular-nums">
-          {String(value).padStart(2, '0')}
-        </span>
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative glass rounded-2xl w-[80px] h-[88px] md:w-[90px] md:h-[100px] flex items-center justify-center overflow-hidden">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <AnimatePresence mode="popLayout">
+          <motion.span
+            key={value}
+            initial={{ y: 20, opacity: 0, filter: 'blur(4px)' }}
+            animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+            exit={{ y: -20, opacity: 0, filter: 'blur(4px)' }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="text-3xl md:text-4xl font-black text-white tabular-nums"
+            style={{ fontFamily: "'JetBrains Mono', monospace" }}
+          >
+            {String(value).padStart(2, '0')}
+          </motion.span>
+        </AnimatePresence>
       </div>
-      <span className="text-slate-500 text-xs uppercase tracking-widest mt-2 font-semibold">{label}</span>
-    </motion.div>
+      <span className="text-[11px] uppercase tracking-[0.15em] text-slate-500 font-semibold">
+        {label}
+      </span>
+    </div>
+  )
+}
+
+function Separator() {
+  return (
+    <div className="flex flex-col items-center justify-center h-[88px] md:h-[100px]">
+      <div className="flex flex-col gap-2">
+        <div className="w-1.5 h-1.5 rounded-full bg-slate-600" />
+        <div className="w-1.5 h-1.5 rounded-full bg-slate-600" />
+      </div>
+    </div>
   )
 }
 
@@ -52,8 +70,9 @@ export default function CountdownTimer({ deadline }) {
 
   if (!deadline) {
     return (
-      <div className="text-center text-slate-500 py-4">
-        No deadline set — ask an admin to configure one.
+      <div className="text-center py-8">
+        <p className="text-slate-500 text-base">No deadline set yet</p>
+        <p className="text-slate-600 text-sm mt-2">An admin can configure the competition end date</p>
       </div>
     )
   }
@@ -62,24 +81,31 @@ export default function CountdownTimer({ deadline }) {
 
   if (timeLeft.expired) {
     return (
-      <div className="text-center py-4">
-        <span className="text-2xl font-bold text-red-400">Competition has ended!</span>
-      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-center py-6"
+      >
+        <span className="text-3xl mb-2 block">🏁</span>
+        <span className="text-xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
+          Time's up!
+        </span>
+      </motion.div>
     )
   }
 
   return (
-    <div className="text-center py-4">
-      <p className="text-slate-400 text-sm uppercase tracking-widest mb-4 font-semibold">
+    <div className="text-center py-2">
+      <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold mb-6">
         Time Remaining
       </p>
-      <div className="flex items-start justify-center gap-3 md:gap-6">
+      <div className="flex items-start justify-center gap-3 md:gap-5">
         <TimeUnit value={timeLeft.days} label="Days" />
-        <span className="text-slate-600 text-3xl font-bold pt-3">:</span>
+        <Separator />
         <TimeUnit value={timeLeft.hours} label="Hours" />
-        <span className="text-slate-600 text-3xl font-bold pt-3">:</span>
+        <Separator />
         <TimeUnit value={timeLeft.minutes} label="Mins" />
-        <span className="text-slate-600 text-3xl font-bold pt-3">:</span>
+        <Separator />
         <TimeUnit value={timeLeft.seconds} label="Secs" />
       </div>
     </div>
