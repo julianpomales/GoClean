@@ -271,16 +271,16 @@ function App() {
           </AnimatePresence>
 
           {/* ── Bottom: leaderboard + feed ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 border border-slate-800/70 pb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-12">
             <motion.div
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}
-              className="px-8 py-8 border-b lg:border-b-0 lg:border-r border-slate-800/70"
+              className="border border-slate-800/70 px-8 py-8"
             >
               <Leaderboard participants={participants} />
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.5 }}
-              className="px-8 py-8"
+              className="border border-slate-800/70 px-8 py-8"
             >
               <EntryFeed entries={entries} />
             </motion.div>

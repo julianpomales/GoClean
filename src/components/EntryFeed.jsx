@@ -41,7 +41,7 @@ export default function EntryFeed({ entries }) {
               animate={{ opacity: isPlaceholder ? 0.35 : 1, y: 0 }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: 0.25, delay: i * 0.03 }}
-              className="group flex items-center gap-4 px-5 py-3.5 bg-[var(--color-card-bg)] hover:bg-slate-900/60 transition-colors"
+              className="group flex items-center gap-4 px-5 py-5 bg-[var(--color-card-bg)] hover:bg-slate-900/60 transition-colors"
             >
               {/* Icon */}
               <div className="w-7 h-7 shrink-0 flex items-center justify-center border border-red-500/20 bg-red-500/5 text-red-400 font-mono text-xs">
