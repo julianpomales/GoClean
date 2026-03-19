@@ -1,33 +1,125 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --color-neon-green: #39FF14;
+  --color-neon-cyan: #00FFFF;
+  --color-deep-bg: #09090B;
+  --color-card-bg: #121214;
+  
+  --font-sans: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, SFMono-Regular, monospace;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 
 body {
-  background: #0b0d17;
-  background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(110,231,183,0.07), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(99,102,241,0.05), transparent);
-  color: #c8cdd8;
-  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--color-deep-bg);
+  color: #e2e8f0;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  min-height: 100vh;
 }
 
-#root { min-height: 100vh; }
+::selection {
+  background-color: var(--color-neon-green);
+  color: #000;
+}
 
-input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.7); }
-select option { background: #161822; color: #c8cdd8; }
+/* Base Utility Classes for Brutalist/Luxury Theme */
+@layer utilities {
+  .panel {
+    background-color: var(--color-card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0;
+    box-shadow: 4px 4px 0px 0px rgba(255,255,255,0.05);
+  }
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+  .panel-hover:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-4px) translateX(4px);
+    box-shadow: 0px 0px 0px 0px rgba(255,255,255,0.05);
+    transition: all 0.2s ease-out;
+  }
+
+  .text-neon {
+    color: var(--color-neon-green);
+    text-shadow: 0 0 8px rgba(57,255,20,0.4);
+  }
+
+  .btn-brutal {
+    background-color: #fff;
+    color: #000;
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.875rem;
+    padding: 1rem 2rem;
+    border: 2px solid #fff;
+    transition: all 0.2s ease-out;
+  }
+  
+  .btn-brutal:hover {
+    background-color: var(--color-neon-green);
+    border-color: var(--color-neon-green);
+  }
+
+  .btn-brutal-ghost {
+    background-color: transparent;
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.875rem;
+    padding: 1rem 2rem;
+    border: 2px solid #334155;
+    transition: all 0.2s ease-out;
+  }
+  
+  .btn-brutal-ghost:hover {
+    border-color: #fff;
+  }
+
+  .mono-number {
+    font-family: var(--font-mono);
+    letter-spacing: -0.05em;
+  }
+}
+
+/* Grain overlay for texture */
+.bg-grain {
+  position: relative;
+}
+.bg-grain::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  pointer-events: none;
+  z-index: 50;
+}
+
+/* Refined custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: theme('colors.slate.800');
+  border: 2px solid theme('colors.slate.950');
+}
+::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.slate.600');
+}
 
 .glass {
   background: rgba(255,255,255,0.03);
@@ -60,3 +152,6 @@ select option { background: #161822; color: #c8cdd8; }
 }
 .animate-float { animation: float 3s ease-in-out infinite; }
 .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+input[type="datetime-local"]::-webkit-calendar-picker-indicator { filter: invert(0.7); }
+select option { background: #161822; color: #c8cdd8; }

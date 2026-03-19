@@ -5,9 +5,8 @@ import {
 } from 'firebase/firestore'
 import { db } from '../firebase'
 
-const inputCls = 'w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3 text-white/90 text-sm focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.05] transition-all duration-200 placeholder-white/15'
-const btnPrimary = 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 disabled:from-white/5 disabled:to-white/5 disabled:text-white/20 text-white font-semibold py-3 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/10 disabled:shadow-none text-sm'
-const labelCls = 'text-[10px] uppercase tracking-[0.15em] text-slate-500 font-semibold mb-2 block'
+const inputCls = 'w-full bg-[var(--color-card-bg)] border border-slate-700 rounded-none px-4 py-3 text-white font-mono text-sm focus:outline-none focus:border-neon-green transition-colors placeholder-slate-600'
+const labelCls = 'font-mono text-[10px] uppercase tracking-widest text-slate-500 mb-2 block'
 
 export default function AdminPanel({ participants, entries, deadline, onLock }) {
   const [activeTab, setActiveTab] = useState('log')
@@ -101,148 +100,152 @@ export default function AdminPanel({ participants, entries, deadline, onLock }) 
   }
 
   const tabs = [
-    { id: 'log', label: 'Log Swear', icon: '🤬' },
-    { id: 'people', label: 'People', icon: '👥' },
-    { id: 'entries', label: 'History', icon: '📋' },
-    { id: 'settings', label: 'Settings', icon: '⚙️' },
+    { id: 'log', label: 'LOG' },
+    { id: 'people', label: 'ROSTER' },
+    { id: 'entries', label: 'HISTORY' },
+    { id: 'settings', label: 'CONFIG' },
   ]
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="glass rounded-2xl overflow-hidden"
+      transition={{ duration: 0.5 }}
+      className="w-full bg-[var(--color-card-bg)] border border-neon-green/30"
     >
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.04]">
-        <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-            <span className="text-xs">🛡️</span>
-          </div>
-          <span className="text-white/90 font-semibold text-sm">Admin Panel</span>
+      <div className="flex items-center justify-between px-6 py-4 border-b border-neon-green/30 bg-neon-green/5">
+        <div className="flex items-center gap-3">
+          <span className="w-2 h-2 rounded-full bg-neon-green animate-pulse" />
+          <span className="font-mono text-xs text-neon-green uppercase tracking-widest">ADMIN PORTAL ACTIVE</span>
         </div>
         <button
           onClick={onLock}
-          className="text-slate-600 hover:text-red-400 text-xs font-medium transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-lg hover:bg-red-500/10"
+          className="font-mono text-[10px] text-slate-400 hover:text-white uppercase tracking-widest transition-colors flex items-center gap-2"
         >
-          <span className="text-[10px]">🔒</span> Lock
+          [ TERMINATE SESSION ]
         </button>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-white/[0.04] px-1">
+      <div className="flex border-b border-slate-800">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`relative flex-1 py-3 text-[11px] font-semibold transition-all duration-200 ${
+            className={`flex-1 py-4 font-mono text-xs uppercase tracking-widest transition-colors ${
               activeTab === tab.id
-                ? 'text-emerald-400'
-                : 'text-slate-500 hover:text-slate-300'
+                ? 'text-neon-green bg-slate-800/30 border-b-2 border-neon-green'
+                : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/10'
             }`}
           >
-            <span className="mr-1">{tab.icon}</span> {tab.label}
-            {activeTab === tab.id && (
-              <motion.div
-                layoutId="admin-tab-indicator"
-                className="absolute bottom-0 inset-x-2 h-0.5 bg-emerald-400 rounded-full"
-                transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-              />
-            )}
+            {tab.label}
           </button>
         ))}
       </div>
 
-      <div className="p-5">
+      <div className="p-6 sm:p-8">
         <AnimatePresence mode="wait">
 
           {activeTab === 'log' && (
-            <motion.form key="log" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.2 }} onSubmit={logSwear} className="flex flex-col gap-4">
+            <motion.form key="log" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onSubmit={logSwear} className="flex flex-col gap-6">
               <div>
-                <label className={labelCls}>Who swore?</label>
+                <label className={labelCls}>SELECT TARGET</label>
                 <select value={selectedId} onChange={e => setSelectedId(e.target.value)} className={inputCls}>
-                  <option value="">Select person...</option>
+                  <option value="">[ SELECT INDIVIDUAL ]</option>
                   {participants.map(p => (
-                    <option key={p.id} value={p.id}>{p.name} (${p.rate}/swear)</option>
+                    <option key={p.id} value={p.id}>{p.name} — ${p.rate}/INFRACTION</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className={labelCls}>Note (optional)</label>
-                <input type="text" value={note} onChange={e => setNote(e.target.value)} placeholder='e.g. "Dropped their coffee"' className={inputCls} />
+                <label className={labelCls}>INFRACTION DETAILS (OPTIONAL)</label>
+                <input type="text" value={note} onChange={e => setNote(e.target.value)} placeholder='e.g. "Dropped coffee"' className={inputCls} />
               </div>
-              <button type="submit" disabled={!selectedId || logLoading} className={logSuccess ? 'bg-emerald-600 text-white font-semibold py-3 rounded-xl text-sm' : `${btnPrimary} ${!logSuccess && !logLoading ? '!from-red-600 !to-red-500 hover:!from-red-500 hover:!to-red-400 !shadow-red-500/10' : ''}`}>
-                {logSuccess ? '✓ Logged!' : logLoading ? 'Logging...' : '🤬 Log Swear'}
+              <button
+                type="submit"
+                disabled={!selectedId || logLoading}
+                className={logSuccess ? 'btn-brutal !bg-emerald-500 !border-emerald-500 !text-white w-full' : 'btn-brutal w-full'}
+              >
+                {logSuccess ? 'INFRACTION LOGGED' : logLoading ? 'PROCESSING...' : 'LOG INFRACTION'}
               </button>
             </motion.form>
           )}
 
           {activeTab === 'people' && (
-            <motion.div key="people" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.2 }} className="flex flex-col gap-4">
-              <form onSubmit={addParticipant} className="flex gap-2">
-                <input type="text" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Name" className={`flex-1 ${inputCls}`} />
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs">$</span>
-                  <input type="number" value={newRate} onChange={e => setNewRate(e.target.value)} min="1" step="1" className={`w-20 !pl-6 ${inputCls}`} />
+            <motion.div key="people" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col gap-8">
+              <form onSubmit={addParticipant} className="flex flex-col sm:flex-row gap-4">
+                <div className="flex-1">
+                  <input type="text" value={newName} onChange={e => setNewName(e.target.value)} placeholder="IDENTIFIER" className={inputCls} />
                 </div>
-                <button type="submit" disabled={!newName.trim() || addLoading} className="bg-emerald-600 hover:bg-emerald-500 disabled:bg-white/5 disabled:text-white/20 text-white font-semibold px-4 py-2 rounded-xl text-xs transition-all">
-                  Add
+                <div className="relative w-full sm:w-32">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-slate-500">$</span>
+                  <input type="number" value={newRate} onChange={e => setNewRate(e.target.value)} min="1" step="1" className={`${inputCls} !pl-8`} />
+                </div>
+                <button type="submit" disabled={!newName.trim() || addLoading} className="btn-brutal whitespace-nowrap">
+                  ADD TO ROSTER
                 </button>
               </form>
-              <div className="flex flex-col gap-1.5">
+              
+              <div className="flex flex-col gap-2">
+                <div className="font-mono text-[10px] uppercase tracking-widest text-slate-500 mb-2 border-b border-slate-800 pb-2">
+                  ACTIVE ROSTER
+                </div>
                 {participants.map(p => (
-                  <div key={p.id} className="flex items-center gap-2 bg-white/[0.02] hover:bg-white/[0.04] rounded-xl px-3.5 py-2.5 transition-colors">
-                    <span className="text-white/80 text-sm font-medium flex-1">{p.name}</span>
+                  <div key={p.id} className="flex items-center gap-4 bg-slate-800/20 border border-slate-800 px-4 py-3 group">
+                    <span className="font-display text-white text-lg uppercase tracking-wider flex-1">{p.name}</span>
+                    
                     {editRates[p.id] !== undefined ? (
-                      <>
+                      <div className="flex items-center gap-2">
                         <div className="relative">
-                          <span className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-500 text-[10px]">$</span>
-                          <input type="number" value={editRates[p.id]} onChange={e => setEditRates(prev => ({ ...prev, [p.id]: e.target.value }))} min="1" className="w-14 bg-white/[0.05] border border-white/10 rounded-lg pl-5 pr-1 py-1 text-white text-xs focus:outline-none" />
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-slate-500 text-xs">$</span>
+                          <input type="number" value={editRates[p.id]} onChange={e => setEditRates(prev => ({ ...prev, [p.id]: e.target.value }))} min="1" className="w-20 bg-black border border-slate-700 pl-6 pr-2 py-1.5 text-white font-mono text-xs focus:outline-none focus:border-neon-green" />
                         </div>
-                        <button onClick={() => saveRate(p.id)} className="text-emerald-400 text-xs font-semibold hover:text-emerald-300">Save</button>
-                        <button onClick={() => setEditRates(prev => { const n = { ...prev }; delete n[p.id]; return n })} className="text-slate-600 text-xs hover:text-slate-400">✕</button>
-                      </>
+                        <button onClick={() => saveRate(p.id)} className="font-mono text-xs text-neon-green hover:text-white">SAVE</button>
+                        <button onClick={() => setEditRates(prev => { const n = { ...prev }; delete n[p.id]; return n })} className="font-mono text-xs text-slate-500 hover:text-white">X</button>
+                      </div>
                     ) : (
-                      <>
-                        <span className="text-slate-500 text-xs font-medium">${p.rate}/ea</span>
-                        <button onClick={() => setEditRates(prev => ({ ...prev, [p.id]: String(p.rate) }))} className="text-slate-600 hover:text-slate-400 text-xs transition-colors">✏️</button>
-                      </>
+                      <div className="flex items-center gap-4">
+                        <span className="font-mono text-slate-400 text-xs">${p.rate}/EA</span>
+                        <button onClick={() => setEditRates(prev => ({ ...prev, [p.id]: String(p.rate) }))} className="font-mono text-[10px] text-slate-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100">[EDIT]</button>
+                      </div>
                     )}
-                    <button onClick={() => removeParticipant(p.id)} className="text-slate-700 hover:text-red-400 text-xs transition-colors ml-0.5">✕</button>
+                    <button onClick={() => removeParticipant(p.id)} className="font-mono text-[10px] text-red-500 hover:text-red-400 transition-colors ml-2 opacity-0 group-hover:opacity-100">[REMOVE]</button>
                   </div>
                 ))}
-                {participants.length === 0 && <p className="text-slate-600 text-sm text-center py-6">No participants yet. Add some above.</p>}
+                {participants.length === 0 && <p className="font-mono text-xs text-center text-slate-600 py-8">[ ROSTER EMPTY ]</p>}
               </div>
             </motion.div>
           )}
 
           {activeTab === 'entries' && (
-            <motion.div key="entries" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.2 }} className="flex flex-col gap-1.5 max-h-80 overflow-y-auto">
+            <motion.div key="entries" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col gap-2 max-h-96 overflow-y-auto">
               {entries.map(entry => (
-                <div key={entry.id} className="flex items-center justify-between bg-white/[0.02] hover:bg-white/[0.04] rounded-xl px-3.5 py-2.5 transition-colors">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-white/80 text-sm font-medium truncate">{entry.participantName}</p>
-                    {entry.note && <p className="text-slate-600 text-xs truncate">"{entry.note}"</p>}
+                <div key={entry.id} className="flex items-center justify-between bg-slate-800/20 border border-slate-800 px-4 py-3 group">
+                  <div className="min-w-0 flex-1 pr-4">
+                    <p className="font-display text-white text-lg uppercase tracking-wider truncate">{entry.participantName}</p>
+                    {entry.note && <p className="font-mono text-xs text-slate-500 truncate mt-1">"{entry.note}"</p>}
                   </div>
-                  <div className="flex items-center gap-3 flex-shrink-0 ml-3">
-                    <span className="text-emerald-400/80 text-xs font-bold" style={{ fontFamily: "'JetBrains Mono', monospace" }}>${(entry.amount || 0).toFixed(0)}</span>
-                    <button onClick={() => deleteEntry(entry)} className="text-slate-700 hover:text-red-400 text-xs transition-colors">✕</button>
+                  <div className="flex items-center gap-6 flex-shrink-0">
+                    <span className="font-mono text-red-400 text-lg">+${(entry.amount || 0).toFixed(0)}</span>
+                    <button onClick={() => deleteEntry(entry)} className="font-mono text-[10px] text-red-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100">
+                      [VOID]
+                    </button>
                   </div>
                 </div>
               ))}
-              {entries.length === 0 && <p className="text-slate-600 text-sm text-center py-6">No entries yet.</p>}
+              {entries.length === 0 && <p className="font-mono text-xs text-center text-slate-600 py-8">[ NO HISTORY ]</p>}
             </motion.div>
           )}
 
           {activeTab === 'settings' && (
-            <motion.form key="settings" initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -5 }} transition={{ duration: 0.2 }} onSubmit={saveDeadline} className="flex flex-col gap-4">
+            <motion.form key="settings" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} onSubmit={saveDeadline} className="flex flex-col gap-6">
               <div>
-                <label className={labelCls}>Competition End Date & Time</label>
+                <label className={labelCls}>TARGET DATE</label>
                 <input type="datetime-local" value={newDeadline} onChange={e => setNewDeadline(e.target.value)} className={inputCls} />
               </div>
-              <button type="submit" disabled={!newDeadline || deadlineLoading} className={btnPrimary}>
-                {deadlineLoading ? 'Saving...' : 'Save Deadline'}
+              <button type="submit" disabled={!newDeadline || deadlineLoading} className="btn-brutal w-full">
+                {deadlineLoading ? 'UPDATING...' : 'UPDATE SYSTEM PROTOCOL'}
               </button>
             </motion.form>
           )}

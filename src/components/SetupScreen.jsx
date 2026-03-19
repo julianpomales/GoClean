@@ -21,9 +21,9 @@ export default function SetupScreen({ onComplete }) {
 
   const handleSetup = async () => {
     setError('')
-    if (pin.length < 4) { setError('PIN must be at least 4 digits'); return }
-    if (pin !== confirmPin) { setError('PINs do not match'); return }
-    if (!deadline) { setError('Please set a deadline'); return }
+    if (pin.length < 4) { setError('PIN REQUIRES MINIMUM 4 DIGITS'); return }
+    if (pin !== confirmPin) { setError('PIN MISMATCH DETECTED'); return }
+    if (!deadline) { setError('DEADLINE CONFIGURATION REQUIRED'); return }
 
     setLoading(true)
     try {
@@ -36,185 +36,148 @@ export default function SetupScreen({ onComplete }) {
       sessionStorage.setItem('gc_admin', '1')
       if (onComplete) onComplete()
     } catch (err) {
-      setError('Something went wrong. Try again.')
+      setError('SYSTEM ERROR. RETRY.')
     }
     setLoading(false)
   }
 
-  const inputCls = 'w-full bg-white/[0.03] border border-white/[0.08] rounded-xl px-4 py-3.5 text-white/90 focus:outline-none focus:border-emerald-500/50 focus:bg-white/[0.05] transition-all duration-200 placeholder-white/10'
+  const inputCls = 'w-full bg-[var(--color-card-bg)] border border-slate-700 rounded-none px-6 py-5 text-white font-mono focus:outline-none focus:border-neon-green transition-colors placeholder-slate-600'
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      {/* Background orbs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-indigo-500/5 rounded-full blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
-      </div>
-
+    <div className="min-h-screen bg-grain flex items-center justify-center p-6">
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="relative w-full max-w-md"
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-xl bg-slate-800/50 border border-slate-800/80 p-px"
       >
-        {/* Logo */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="text-center mb-10"
-        >
-          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-emerald-500/20 to-cyan-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-5 animate-pulse-glow">
-            <span className="text-4xl">🧼</span>
-          </div>
-          <h1 className="text-3xl font-black text-white tracking-tight">GoClean</h1>
-          <p className="text-slate-500 text-sm mt-2 leading-relaxed">
-            The office swear jar competition.<br />Keep it clean or pay the price.
-          </p>
-        </motion.div>
-
-        {/* Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="glass rounded-3xl p-8"
-        >
-          {step === 0 && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center"
-            >
-              <h2 className="text-white font-bold text-lg mb-2">Welcome!</h2>
-              <p className="text-slate-500 text-sm mb-8 leading-relaxed">
-                Looks like no one has set up a group yet. Be the first to create one and become the admin.
+        <div className="bg-[var(--color-card-bg)] p-8 sm:p-12 relative overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center gap-4 mb-12">
+            <span className="text-3xl">⚙️</span>
+            <div>
+              <h2 className="font-display font-bold text-2xl tracking-tighter uppercase text-white">
+                System Config
+              </h2>
+              <p className="font-mono text-[10px] uppercase tracking-widest text-neon-green mt-1">
+                INITIALIZATION PROTOCOL
               </p>
-              <button
-                onClick={() => setStep(1)}
-                className="w-full bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/15 text-sm"
-              >
-                Create a Group
+            </div>
+          </div>
+
+          {step === 0 && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col gap-10 text-center">
+              <div>
+                <p className="font-display text-4xl uppercase tracking-tighter text-white mb-4">NO LEDGER DETECTED</p>
+                <p className="font-mono text-sm text-slate-400 uppercase tracking-widest leading-relaxed">
+                  You are the first operator to authenticate.
+                  <br />Proceed to configure the initial competition parameters.
+                </p>
+              </div>
+              <button onClick={() => setStep(1)} className="btn-brutal w-full">
+                BEGIN CONFIGURATION
               </button>
             </motion.div>
           )}
 
           {step === 1 && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <button onClick={() => setStep(0)} className="text-slate-500 hover:text-white transition-colors text-sm">←</button>
-                <div>
-                  <h2 className="text-white font-bold text-lg">Set Admin PIN</h2>
-                  <p className="text-slate-500 text-xs">This PIN protects admin controls</p>
-                </div>
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col gap-8">
+              <div className="flex items-center gap-4">
+                <button onClick={() => setStep(0)} className="font-mono text-slate-500 hover:text-white transition-colors">
+                  [ BACK ]
+                </button>
+                <h3 className="font-mono text-sm uppercase tracking-widest text-white">STEP 1: ADMIN PIN</h3>
               </div>
 
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-6">
                 <div>
-                  <label className="text-[10px] uppercase tracking-[0.15em] text-slate-500 font-semibold mb-2 block">
-                    PIN (min. 4 digits)
+                  <label className="font-mono text-[10px] uppercase tracking-widest text-slate-500 mb-3 block">
+                    MASTER PIN (MIN 4 DIGITS)
                   </label>
                   <input
                     type="password"
                     inputMode="numeric"
                     value={pin}
                     onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                    className={`${inputCls} text-center text-2xl tracking-[0.3em]`}
+                    className={`${inputCls} text-3xl tracking-[0.5em] text-center`}
                     placeholder="••••"
                     autoFocus
                   />
                 </div>
                 <div>
-                  <label className="text-[10px] uppercase tracking-[0.15em] text-slate-500 font-semibold mb-2 block">
-                    Confirm PIN
+                  <label className="font-mono text-[10px] uppercase tracking-widest text-slate-500 mb-3 block">
+                    VERIFY PIN
                   </label>
                   <input
                     type="password"
                     inputMode="numeric"
                     value={confirmPin}
                     onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 8))}
-                    className={`${inputCls} text-center text-2xl tracking-[0.3em]`}
+                    className={`${inputCls} text-3xl tracking-[0.5em] text-center`}
                     placeholder="••••"
                   />
                 </div>
                 <button
                   onClick={() => {
-                    if (pin.length < 4) { setError('PIN must be at least 4 digits'); return }
-                    if (pin !== confirmPin) { setError('PINs do not match'); return }
+                    if (pin.length < 4) { setError('PIN REQUIRES MINIMUM 4 DIGITS'); return }
+                    if (pin !== confirmPin) { setError('PIN MISMATCH DETECTED'); return }
                     setError('')
                     setStep(2)
                   }}
                   disabled={pin.length < 4}
-                  className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 disabled:from-white/5 disabled:to-white/5 disabled:text-white/20 text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/10 disabled:shadow-none text-sm"
+                  className="btn-brutal w-full mt-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Continue →
+                  PROCEED
                 </button>
               </div>
             </motion.div>
           )}
 
           {step === 2 && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <button onClick={() => setStep(1)} className="text-slate-500 hover:text-white transition-colors text-sm">←</button>
-                <div>
-                  <h2 className="text-white font-bold text-lg">Set Deadline</h2>
-                  <p className="text-slate-500 text-xs">When does the competition end?</p>
-                </div>
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col gap-8">
+              <div className="flex items-center gap-4">
+                <button onClick={() => setStep(1)} className="font-mono text-slate-500 hover:text-white transition-colors">
+                  [ BACK ]
+                </button>
+                <h3 className="font-mono text-sm uppercase tracking-widest text-white">STEP 2: TARGET DATE</h3>
               </div>
 
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-6">
                 <div>
-                  <label className="text-[10px] uppercase tracking-[0.15em] text-slate-500 font-semibold mb-2 block">
-                    End Date & Time
+                  <label className="font-mono text-[10px] uppercase tracking-widest text-slate-500 mb-3 block">
+                    COMPETITION DEADLINE
                   </label>
                   <input
                     type="datetime-local"
                     value={deadline}
                     onChange={e => setDeadline(e.target.value)}
-                    className={inputCls}
+                    className={`${inputCls} text-xl`}
                     autoFocus
                   />
                 </div>
                 <button
                   onClick={handleSetup}
                   disabled={!deadline || loading}
-                  className="bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 disabled:from-white/5 disabled:to-white/5 disabled:text-white/20 text-white font-semibold py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-emerald-500/10 disabled:shadow-none text-sm"
+                  className="btn-brutal w-full mt-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                 >
-                  {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                      Setting up...
-                    </span>
-                  ) : 'Launch GoClean 🚀'}
+                  {loading ? 'INITIALIZING...' : 'INITIALIZE SYSTEM'}
                 </button>
               </div>
             </motion.div>
           )}
 
           {error && (
-            <motion.p
+            <motion.div
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-red-400/90 text-sm text-center mt-4"
+              className="mt-6 bg-red-500/10 border border-red-500/20 px-4 py-3"
             >
-              {error}
-            </motion.p>
+              <p className="font-mono text-red-500 text-xs text-center uppercase tracking-widest">
+                {error}
+              </p>
+            </motion.div>
           )}
-        </motion.div>
-
-        {/* Footer */}
-        <p className="text-center text-slate-700 text-xs mt-8">
-          Share the URL with your office to get everyone on board
-        </p>
+        </div>
       </motion.div>
     </div>
   )

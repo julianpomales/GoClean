@@ -3,24 +3,22 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 function TimeUnit({ value, label }) {
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="relative glass rounded-2xl w-[80px] h-[88px] md:w-[90px] md:h-[100px] flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+    <div className="flex flex-col items-center gap-4">
+      <div className="relative w-[70px] h-[80px] sm:w-[90px] sm:h-[100px] flex items-center justify-center border border-slate-800 bg-[var(--color-deep-bg)] shadow-[4px_4px_0px_0px_rgba(255,255,255,0.02)]">
         <AnimatePresence mode="popLayout">
           <motion.span
             key={value}
-            initial={{ y: 20, opacity: 0, filter: 'blur(4px)' }}
-            animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-            exit={{ y: -20, opacity: 0, filter: 'blur(4px)' }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="text-3xl md:text-4xl font-black text-white tabular-nums"
-            style={{ fontFamily: "'JetBrains Mono', monospace" }}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -20, opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="text-4xl sm:text-5xl font-mono text-white tracking-tighter"
           >
             {String(value).padStart(2, '0')}
           </motion.span>
         </AnimatePresence>
       </div>
-      <span className="text-[11px] uppercase tracking-[0.15em] text-slate-500 font-semibold">
+      <span className="font-mono text-[10px] uppercase tracking-widest text-slate-500">
         {label}
       </span>
     </div>
@@ -29,10 +27,10 @@ function TimeUnit({ value, label }) {
 
 function Separator() {
   return (
-    <div className="flex flex-col items-center justify-center h-[88px] md:h-[100px]">
-      <div className="flex flex-col gap-2">
-        <div className="w-1.5 h-1.5 rounded-full bg-slate-600" />
-        <div className="w-1.5 h-1.5 rounded-full bg-slate-600" />
+    <div className="flex flex-col items-center justify-center h-[80px] sm:h-[100px]">
+      <div className="flex flex-col gap-3">
+        <div className="w-1.5 h-1.5 bg-slate-800 rounded-full" />
+        <div className="w-1.5 h-1.5 bg-slate-800 rounded-full" />
       </div>
     </div>
   )
@@ -70,9 +68,9 @@ export default function CountdownTimer({ deadline }) {
 
   if (!deadline) {
     return (
-      <div className="text-center py-8">
-        <p className="text-slate-500 text-base">No deadline set yet</p>
-        <p className="text-slate-600 text-sm mt-2">An admin can configure the competition end date</p>
+      <div className="text-center w-full">
+        <div className="font-mono text-xs uppercase tracking-widest text-slate-500 mb-4">[ TIMER_OFFLINE ]</div>
+        <p className="font-display text-2xl text-slate-600">AWAITING TARGET DATE</p>
       </div>
     )
   }
@@ -84,29 +82,29 @@ export default function CountdownTimer({ deadline }) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="text-center py-6"
+        className="text-center w-full"
       >
-        <span className="text-3xl mb-2 block">🏁</span>
-        <span className="text-xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">
-          Time's up!
+        <span className="text-5xl mb-6 block">🏁</span>
+        <span className="font-display font-black text-4xl uppercase tracking-tighter text-red-500 block">
+          COMPETITION CONCLUDED
         </span>
       </motion.div>
     )
   }
 
   return (
-    <div className="text-center py-2">
-      <p className="text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold mb-6">
-        Time Remaining
+    <div className="w-full flex flex-col items-center justify-center">
+      <p className="font-mono text-xs uppercase tracking-widest text-slate-500 mb-8 w-full text-center">
+        [ TIME_REMAINING ]
       </p>
-      <div className="flex items-start justify-center gap-3 md:gap-5">
-        <TimeUnit value={timeLeft.days} label="Days" />
+      <div className="flex items-start justify-center gap-3 sm:gap-6">
+        <TimeUnit value={timeLeft.days} label="DAYS" />
         <Separator />
-        <TimeUnit value={timeLeft.hours} label="Hours" />
+        <TimeUnit value={timeLeft.hours} label="HRS" />
         <Separator />
-        <TimeUnit value={timeLeft.minutes} label="Mins" />
+        <TimeUnit value={timeLeft.minutes} label="MINS" />
         <Separator />
-        <TimeUnit value={timeLeft.seconds} label="Secs" />
+        <TimeUnit value={timeLeft.seconds} label="SECS" />
       </div>
     </div>
   )

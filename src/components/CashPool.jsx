@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
 
 function AnimatedDollar({ value }) {
@@ -18,39 +18,29 @@ function AnimatedDollar({ value }) {
 
 export default function CashPool({ total }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-      className="relative text-center py-6"
-    >
-      {/* Glow behind the number */}
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-80 h-40 bg-emerald-500/10 rounded-full blur-3xl" />
-      </div>
-
-      <p className="relative text-xs uppercase tracking-[0.2em] text-slate-500 font-semibold mb-5">
-        Cash Pool
+    <div className="flex flex-col items-center justify-center min-h-[300px]">
+      <p className="font-mono text-xs uppercase tracking-widest text-slate-500 mb-8">
+        [ POOL_TOTAL ]
       </p>
 
-      <div className="relative flex items-baseline justify-center">
-        <span className="text-emerald-400/60 text-5xl md:text-6xl font-bold mr-2 select-none">$</span>
-        <span
-          className="text-7xl sm:text-8xl md:text-9xl font-black tracking-tight text-white"
-          style={{ fontFamily: "'JetBrains Mono', monospace" }}
-        >
+      <div className="flex items-start justify-center">
+        <span className="text-neon-green text-4xl sm:text-6xl font-mono mt-4 mr-2 select-none">$</span>
+        <span className="text-[5rem] sm:text-[8rem] md:text-[10rem] font-display font-black leading-none tracking-tighter text-white">
           <AnimatedDollar value={total} />
         </span>
       </div>
 
-      <motion.p
+      <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="relative text-slate-600 text-sm mt-4 tracking-wide"
+        className="mt-12 flex items-center gap-3"
       >
-        {total > 0 ? 'and counting...' : 'Squeaky clean so far'}
-      </motion.p>
-    </motion.div>
+        <span className={`w-2 h-2 rounded-full ${total > 0 ? 'bg-red-500 animate-pulse' : 'bg-slate-600'}`} />
+        <p className="font-mono text-xs uppercase tracking-widest text-slate-400">
+          {total > 0 ? 'FUNDS ACCUMULATING' : 'ZERO INFRACTIONS'}
+        </p>
+      </motion.div>
+    </div>
   )
 }
