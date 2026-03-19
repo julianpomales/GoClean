@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { collection, doc, onSnapshot, orderBy, query, getDocs, where } from 'firebase/firestore'
+import { collection, doc, onSnapshot, orderBy, query, getDocs, where, setDoc, getDoc } from 'firebase/firestore'
 import { onAuthStateChanged, signOut } from 'firebase/auth'
 import { db, auth } from './firebase'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -77,22 +77,50 @@ function App() {
     return () => { pUnsub(); eUnsub() }
   }, [activeGroup])
 
-  const handleSelectGroup = (group) => {
+  const upsertParticipant = async (groupId) => {
+    if (!user) return
+    const ref = doc(db, 'groups', groupId, 'participants', user.uid)
+    const snap = await getDoc(ref)
+    if (!snap.exists()) {
+      // New participant — write full record with defaults
+      await setDoc(ref, {
+        uid: user.uid,
+        name: user.displayName || user.email.split('@')[0],
+        photoURL: user.photoURL || null,
+        email: user.email,
+        rate: 1,
+        totalOwed: 0,
+        swearCount: 0,
+      })
+    } else {
+      // Returning user — only refresh profile fields, never touch rate/totalOwed/swearCount
+      await setDoc(ref, {
+        name: user.displayName || user.email.split('@')[0],
+        photoURL: user.photoURL || null,
+        email: user.email,
+      }, { merge: true })
+    }
+  }
+
+  const handleSelectGroup = async (group) => {
     setActiveGroup(group)
     setIsAdmin(false)
     setScreen('dashboard')
+    await upsertParticipant(group.id)
   }
 
-  const handleGroupCreated = (group) => {
+  const handleGroupCreated = async (group) => {
     setActiveGroup(group)
     setIsAdmin(true)
     setScreen('dashboard')
+    await upsertParticipant(group.id)
   }
 
-  const handleGroupJoined = (group) => {
+  const handleGroupJoined = async (group) => {
     setActiveGroup(group)
     setIsAdmin(false)
     setScreen('dashboard')
+    await upsertParticipant(group.id)
   }
 
   const handleLock = () => setIsAdmin(false)
