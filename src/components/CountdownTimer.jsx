@@ -1,17 +1,24 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-function Digit({ value }) {
+function Digit({ value, tv }) {
+  const boxCls = tv
+    ? 'w-[60px] h-[80px] sm:w-[96px] sm:h-[120px] lg:w-[140px] lg:h-[180px]'
+    : 'w-[34px] h-[50px] sm:w-[60px] sm:h-[80px] lg:w-[96px] lg:h-[120px]'
+  const textCls = tv
+    ? 'text-5xl sm:text-7xl lg:text-9xl'
+    : 'text-2xl sm:text-4xl lg:text-6xl'
+  const yAmt = tv ? 24 : 16
   return (
-    <div className="relative w-[34px] h-[50px] sm:w-[60px] sm:h-[80px] lg:w-[96px] lg:h-[120px] flex items-center justify-center overflow-hidden border border-slate-800 bg-[var(--color-deep-bg)]">
+    <div className={`relative ${boxCls} flex items-center justify-center overflow-hidden border border-slate-800 bg-[var(--color-deep-bg)]`}>
       <AnimatePresence mode="popLayout">
         <motion.span
           key={value}
-          initial={{ y: 16, opacity: 0 }}
+          initial={{ y: yAmt, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -16, opacity: 0 }}
+          exit={{ y: -yAmt, opacity: 0 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="text-2xl sm:text-4xl lg:text-6xl font-mono text-white tracking-tighter absolute"
+          className={`${textCls} font-mono text-white tracking-tighter absolute`}
         >
           {value}
         </motion.span>
@@ -20,33 +27,40 @@ function Digit({ value }) {
   )
 }
 
-function TimeUnit({ value, label }) {
+function TimeUnit({ value, label, tv }) {
   const padded = String(value).padStart(2, '0')
+  const labelCls = tv ? 'text-xs sm:text-sm' : 'text-[9px] sm:text-xs'
+  const gapCls = tv ? 'gap-3 sm:gap-5' : 'gap-2 sm:gap-4'
+  const digitGap = tv ? 'gap-2 sm:gap-3' : 'gap-1 sm:gap-2'
   return (
-    <div className="flex flex-col items-center gap-2 sm:gap-4">
-      <div className="flex gap-1 sm:gap-2">
-        <Digit value={padded[0]} />
-        <Digit value={padded[1]} />
+    <div className={`flex flex-col items-center ${gapCls}`}>
+      <div className={`flex ${digitGap}`}>
+        <Digit value={padded[0]} tv={tv} />
+        <Digit value={padded[1]} tv={tv} />
       </div>
-      <span className="font-mono text-[9px] sm:text-xs uppercase tracking-widest text-slate-500">
+      <span className={`font-mono ${labelCls} uppercase tracking-widest text-slate-500`}>
         {label}
       </span>
     </div>
   )
 }
 
-function Separator() {
+function Separator({ tv }) {
+  const hCls = tv
+    ? 'h-[80px] sm:h-[120px] lg:h-[180px]'
+    : 'h-[50px] sm:h-[80px] lg:h-[120px]'
+  const dotCls = tv ? 'w-2 h-2' : 'w-1.5 h-1.5'
   return (
-    <div className="flex flex-col items-center justify-center h-[50px] sm:h-[80px] lg:h-[120px]">
+    <div className={`flex flex-col items-center justify-center ${hCls}`}>
       <div className="flex flex-col gap-2">
-        <div className="w-1.5 h-1.5 bg-slate-700 rounded-full" />
-        <div className="w-1.5 h-1.5 bg-slate-700 rounded-full" />
+        <div className={`${dotCls} bg-slate-700 rounded-full`} />
+        <div className={`${dotCls} bg-slate-700 rounded-full`} />
       </div>
     </div>
   )
 }
 
-export default function CountdownTimer({ deadline }) {
+export default function CountdownTimer({ deadline, tv = false }) {
   const [timeLeft, setTimeLeft] = useState(null)
 
   useEffect(() => {
@@ -102,19 +116,23 @@ export default function CountdownTimer({ deadline }) {
     )
   }
 
+  const outerGap = tv ? 'gap-8' : 'gap-5'
+  const unitGap = tv ? 'gap-4 sm:gap-8 lg:gap-12' : 'gap-2 sm:gap-5 lg:gap-8'
+  const labelSize = tv ? 'text-xs sm:text-sm' : 'text-[10px]'
+
   return (
-    <div className="flex flex-col items-center justify-center w-full gap-5">
-      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500">
+    <div className={`flex flex-col items-center justify-center w-full ${outerGap}`}>
+      <p className={`font-mono ${labelSize} uppercase tracking-[0.3em] text-slate-500`}>
         TIME REMAINING
       </p>
-      <div className="flex items-start gap-2 sm:gap-5 lg:gap-8">
-        <TimeUnit value={timeLeft.days} label="DAYS" />
-        <Separator />
-        <TimeUnit value={timeLeft.hours} label="HRS" />
-        <Separator />
-        <TimeUnit value={timeLeft.minutes} label="MINS" />
-        <Separator />
-        <TimeUnit value={timeLeft.seconds} label="SECS" />
+      <div className={`flex items-start ${unitGap}`}>
+        <TimeUnit value={timeLeft.days} label="DAYS" tv={tv} />
+        <Separator tv={tv} />
+        <TimeUnit value={timeLeft.hours} label="HRS" tv={tv} />
+        <Separator tv={tv} />
+        <TimeUnit value={timeLeft.minutes} label="MINS" tv={tv} />
+        <Separator tv={tv} />
+        <TimeUnit value={timeLeft.seconds} label="SECS" tv={tv} />
       </div>
     </div>
   )

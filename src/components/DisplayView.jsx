@@ -188,9 +188,9 @@ export default function DisplayView({ token }) {
             <div className="absolute top-0 bottom-0 left-1/2 w-px bg-white" />
             <div className="absolute left-0 right-0 top-1/2 h-px bg-white" />
           </div>
-          <CashPool total={totalPool} />
+          <CashPool total={totalPool} tv />
           <div className="w-full border-t border-slate-800/60 py-10">
-            <CountdownTimer deadline={deadline} />
+            <CountdownTimer deadline={deadline} tv />
           </div>
         </div>
 
