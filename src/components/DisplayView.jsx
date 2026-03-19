@@ -228,25 +228,24 @@ export default function DisplayView({ token }) {
           </div>
         </div>
 
-        {/* ── Hero: pool + countdown side by side ── */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        {/* ── Hero: pool + countdown stacked in one full-width card ── */}
+        <div className="relative bg-[var(--color-card-bg)] border border-slate-800 mb-6 overflow-hidden">
+          <div className="absolute inset-0 pointer-events-none opacity-[0.025]">
+            <div className="absolute top-0 bottom-0 left-1/2 w-px bg-white" />
+            <div className="absolute left-0 right-0 top-1/2 h-px bg-white" />
+          </div>
           {/* Pool */}
-          <div className="relative bg-[var(--color-card-bg)] border border-slate-800 flex flex-col items-center justify-center py-8 overflow-hidden">
-            <div className="absolute inset-0 pointer-events-none opacity-[0.025]">
-              <div className="absolute top-0 bottom-0 left-1/2 w-px bg-white" />
-              <div className="absolute left-0 right-0 top-1/2 h-px bg-white" />
-            </div>
+          <div className="flex flex-col items-center justify-center py-8">
             <p className="font-mono text-sm uppercase tracking-[0.3em] text-slate-400 mb-4">TOTAL POOL</p>
             <div className="flex items-center gap-3">
-              <span className="font-mono font-bold text-neon-green leading-none" style={{ fontSize: 'clamp(3rem, 8vw, 9rem)' }}>$</span>
-              <span className="font-mono font-bold text-white leading-none tracking-tighter tabular-nums" style={{ fontSize: 'clamp(3rem, 8vw, 9rem)' }}>
+              <span className="font-mono font-bold text-neon-green leading-none" style={{ fontSize: 'clamp(3rem, 10vw, 10rem)' }}>$</span>
+              <span className="font-mono font-bold text-white leading-none tracking-tighter tabular-nums" style={{ fontSize: 'clamp(3rem, 10vw, 10rem)' }}>
                 {totalPool.toFixed(2)}
               </span>
             </div>
           </div>
-
           {/* Countdown */}
-          <div className="bg-[var(--color-card-bg)] border border-slate-800 flex flex-col items-center justify-center py-8">
+          <div className="border-t border-slate-800/60 py-8">
             <CountdownTimer deadline={group.deadline} tv />
           </div>
         </div>
