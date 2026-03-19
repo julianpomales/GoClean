@@ -3,15 +3,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 function Digit({ value }) {
   return (
-    <div className="relative w-[36px] h-[60px] sm:w-[44px] sm:h-[72px] flex items-center justify-center overflow-hidden border border-slate-800 bg-[var(--color-deep-bg)]">
+    <div className="relative w-[28px] h-[44px] sm:w-[34px] sm:h-[52px] flex items-center justify-center overflow-hidden border border-slate-800 bg-[var(--color-deep-bg)]">
       <AnimatePresence mode="popLayout">
         <motion.span
           key={value}
-          initial={{ y: 24, opacity: 0 }}
+          initial={{ y: 18, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -24, opacity: 0 }}
+          exit={{ y: -18, opacity: 0 }}
           transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-          className="text-3xl sm:text-4xl font-mono text-white tracking-tighter absolute"
+          className="text-xl sm:text-2xl font-mono text-white tracking-tighter absolute"
         >
           {value}
         </motion.span>
@@ -37,10 +37,10 @@ function TimeUnit({ value, label }) {
 
 function Separator() {
   return (
-    <div className="flex flex-col items-center justify-center h-[80px] sm:h-[100px]">
-      <div className="flex flex-col gap-3">
-        <div className="w-1.5 h-1.5 bg-slate-800 rounded-full" />
-        <div className="w-1.5 h-1.5 bg-slate-800 rounded-full" />
+    <div className="flex flex-col items-center justify-center h-[44px] sm:h-[52px]">
+      <div className="flex flex-col gap-2">
+        <div className="w-1 h-1 bg-slate-700 rounded-full" />
+        <div className="w-1 h-1 bg-slate-700 rounded-full" />
       </div>
     </div>
   )
@@ -107,7 +107,7 @@ export default function CountdownTimer({ deadline }) {
       <p className="font-mono text-xs uppercase tracking-widest text-slate-500 mb-8 w-full text-center">
         [ TIME_REMAINING ]
       </p>
-      <div className="flex items-start justify-center gap-3 sm:gap-6">
+      <div className="flex items-start justify-center gap-2 sm:gap-3">
         <TimeUnit value={timeLeft.days} label="DAYS" />
         <Separator />
         <TimeUnit value={timeLeft.hours} label="HRS" />

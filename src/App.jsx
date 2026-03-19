@@ -8,6 +8,7 @@ import CountdownTimer from './components/CountdownTimer'
 import Leaderboard from './components/Leaderboard'
 import EntryFeed from './components/EntryFeed'
 import AdminPanel from './components/AdminPanel'
+import LogInfraction from './components/LogInfraction'
 import PinModal from './components/PinModal'
 import Confetti from './components/Confetti'
 import LandingPage from './components/LandingPage'
@@ -221,6 +222,9 @@ function App() {
               <CountdownTimer deadline={deadline} />
             </div>
           </div>
+
+          {/* Log Infraction — visible to all */}
+          <LogInfraction groupId={activeGroup.id} participants={participants} />
 
           {/* Admin Panel */}
           <AnimatePresence>

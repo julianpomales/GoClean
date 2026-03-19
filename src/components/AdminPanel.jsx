@@ -100,7 +100,6 @@ export default function AdminPanel({ groupId, participants, entries, deadline, o
   }
 
   const tabs = [
-    { id: 'log', label: 'LOG' },
     { id: 'people', label: 'ROSTER' },
     { id: 'entries', label: 'HISTORY' },
     { id: 'settings', label: 'CONFIG' },
