@@ -104,7 +104,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-grain text-slate-200 font-sans selection:bg-neon-green selection:text-black flex flex-col px-4 sm:px-8">
+    <div className="min-h-screen bg-grain text-slate-200 font-sans selection:bg-neon-green selection:text-black flex flex-col">
       <Confetti trigger={confettiTrigger} />
 
       <AnimatePresence>
@@ -124,7 +124,7 @@ function App() {
       </div>
 
       {/* Header */}
-      <header className="relative z-40 w-full max-w-[1400px] mx-auto py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <header className="relative z-40 w-full py-8 px-6 sm:px-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <span className="text-3xl hidden sm:block">🧼</span>
           <div>
@@ -204,7 +204,7 @@ function App() {
         </div>
       </main>
 
-      <footer className="relative z-10 w-full max-w-[1400px] mx-auto py-8 flex items-center justify-between border-t border-slate-800/50 mt-10 sm:mt-20">
+      <footer className="relative z-10 w-full py-8 px-6 sm:px-12 flex items-center justify-between border-t border-slate-800/50 mt-10 sm:mt-20">
         <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
           GOCLEAN VERSION 1.0.0
         </span>
