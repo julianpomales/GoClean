@@ -36,7 +36,7 @@ export default function Leaderboard({ participants }) {
                 animate={{ opacity: isPlaceholder ? 0.35 : 1, x: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.35, delay: i * 0.04 }}
-                className="relative group flex items-center gap-4 px-5 py-4 bg-[var(--color-card-bg)] hover:bg-slate-900/60 transition-colors overflow-hidden"
+                className="relative group flex items-center gap-4 px-5 py-0 min-h-[72px] bg-[var(--color-card-bg)] hover:bg-slate-900/60 transition-colors overflow-hidden"
               >
                 {/* Bar fill */}
                 <div
