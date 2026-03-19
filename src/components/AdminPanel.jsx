@@ -172,48 +172,57 @@ export default function AdminPanel({ groupId, participants, entries, deadline, o
           )}
 
           {activeTab === 'people' && (
-            <motion.div key="people" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col gap-8">
-              <form onSubmit={addParticipant} className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <input type="text" value={newName} onChange={e => setNewName(e.target.value)} placeholder="IDENTIFIER" className={inputCls} />
-                </div>
-                <div className="relative w-full sm:w-32">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 font-mono text-slate-500">$</span>
-                  <input type="number" value={newRate} onChange={e => setNewRate(e.target.value)} min="1" step="1" className={`${inputCls} !pl-8`} />
-                </div>
-                <button type="submit" disabled={!newName.trim() || addLoading} className="btn-brutal whitespace-nowrap">
-                  ADD TO ROSTER
-                </button>
-              </form>
-              
-              <div className="flex flex-col gap-2">
-                <div className="font-mono text-[10px] uppercase tracking-widest text-slate-500 mb-2 border-b border-slate-800 pb-2">
-                  ACTIVE ROSTER
-                </div>
-                {participants.map(p => (
-                  <div key={p.id} className="flex items-center gap-4 bg-slate-800/20 border border-slate-800 px-4 py-3 group">
-                    <span className="font-display text-white text-lg uppercase tracking-wider flex-1">{p.name}</span>
-                    
-                    {editRates[p.id] !== undefined ? (
-                      <div className="flex items-center gap-2">
-                        <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-slate-500 text-xs">$</span>
-                          <input type="number" value={editRates[p.id]} onChange={e => setEditRates(prev => ({ ...prev, [p.id]: e.target.value }))} min="1" className="w-20 bg-black border border-slate-700 pl-6 pr-2 py-1.5 text-white font-mono text-xs focus:outline-none focus:border-neon-green" />
-                        </div>
-                        <button onClick={() => saveRate(p.id)} className="font-mono text-xs text-neon-green hover:text-white">SAVE</button>
-                        <button onClick={() => setEditRates(prev => { const n = { ...prev }; delete n[p.id]; return n })} className="font-mono text-xs text-slate-500 hover:text-white">X</button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-4">
-                        <span className="font-mono text-slate-400 text-xs">${p.rate}/EA</span>
-                        <button onClick={() => setEditRates(prev => ({ ...prev, [p.id]: String(p.rate) }))} className="font-mono text-[10px] text-slate-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100">[EDIT]</button>
-                      </div>
-                    )}
-                    <button onClick={() => removeParticipant(p.id)} className="font-mono text-[10px] text-red-500 hover:text-red-400 transition-colors ml-2 opacity-0 group-hover:opacity-100">[REMOVE]</button>
-                  </div>
-                ))}
-                {participants.length === 0 && <p className="font-mono text-xs text-center text-slate-600 py-8">[ ROSTER EMPTY ]</p>}
+            <motion.div key="people" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="flex flex-col gap-3">
+              <div className="font-mono text-[10px] uppercase tracking-widest text-slate-500 pb-2 border-b border-slate-800">
+                ROSTER — SET RATE PER INFRACTION
               </div>
+              {participants.map(p => (
+                <div key={p.id} className="flex items-center gap-4 bg-slate-800/20 border border-slate-800 px-4 py-3">
+                  {/* Avatar */}
+                  {p.photoURL
+                    ? <img src={p.photoURL} alt={p.name} className="w-8 h-8 rounded-none border border-slate-700 grayscale shrink-0" />
+                    : <div className="w-8 h-8 border border-slate-700 flex items-center justify-center font-display text-sm text-slate-400 shrink-0">{p.name?.[0]?.toUpperCase()}</div>
+                  }
+
+                  {/* Name + stats */}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-display text-white text-base uppercase tracking-wider truncate">{p.name}</p>
+                    <p className="font-mono text-[10px] text-slate-500">{p.swearCount || 0} infractions · ${(p.totalOwed || 0).toFixed(2)} owed</p>
+                  </div>
+
+                  {/* Rate edit — always visible */}
+                  {editRates[p.id] !== undefined ? (
+                    <div className="flex items-center gap-2 shrink-0">
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-slate-500 text-xs">$</span>
+                        <input
+                          type="number"
+                          value={editRates[p.id]}
+                          onChange={e => setEditRates(prev => ({ ...prev, [p.id]: e.target.value }))}
+                          onKeyDown={e => e.key === 'Enter' && saveRate(p.id)}
+                          min="0.25" step="0.25"
+                          className="w-20 bg-[var(--color-deep-bg)] border border-neon-green/50 pl-6 pr-2 py-1.5 text-white font-mono text-xs focus:outline-none focus:border-neon-green"
+                          autoFocus
+                        />
+                      </div>
+                      <button onClick={() => saveRate(p.id)} className="font-mono text-xs text-neon-green hover:text-white transition-colors">SAVE</button>
+                      <button onClick={() => setEditRates(prev => { const n = { ...prev }; delete n[p.id]; return n })} className="font-mono text-xs text-slate-500 hover:text-white transition-colors">✕</button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setEditRates(prev => ({ ...prev, [p.id]: String(p.rate || 1) }))}
+                      className="shrink-0 flex items-center gap-2 font-mono text-sm text-slate-300 hover:text-neon-green border border-slate-700 hover:border-neon-green/50 px-3 py-1.5 transition-colors"
+                    >
+                      <span className="text-slate-500 text-xs">$</span>{(p.rate || 1).toFixed(2)}<span className="text-slate-600 text-[10px] ml-1">/ INFRACTION</span>
+                    </button>
+                  )}
+
+                  <button onClick={() => removeParticipant(p.id)} className="font-mono text-[10px] text-red-600 hover:text-red-400 transition-colors shrink-0">[×]</button>
+                </div>
+              ))}
+              {participants.length === 0 && (
+                <p className="font-mono text-xs text-center text-slate-600 py-8">[ MEMBERS WILL APPEAR WHEN THEY JOIN THE GROUP ]</p>
+              )}
             </motion.div>
           )}
 
