@@ -103,11 +103,11 @@ export default function CountdownTimer({ deadline }) {
   }
 
   return (
-    <div className="w-full flex flex-col items-center justify-center">
-      <p className="font-mono text-xs uppercase tracking-widest text-slate-500 mb-8 w-full text-center">
-        [ TIME_REMAINING ]
+    <div className="flex flex-col justify-center h-full py-8 px-2">
+      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-500 mb-4">
+        TIME REMAINING
       </p>
-      <div className="flex items-start justify-center gap-2 sm:gap-3">
+      <div className="flex items-start gap-2 sm:gap-3">
         <TimeUnit value={timeLeft.days} label="DAYS" />
         <Separator />
         <TimeUnit value={timeLeft.hours} label="HRS" />

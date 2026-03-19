@@ -210,23 +210,24 @@ function App() {
         </div>
       </header>
 
-      <main className="relative z-10 flex-1 w-full py-4">
-        <div className="w-full max-w-5xl mx-auto px-6 sm:px-12 flex flex-col gap-12">
-          {/* Hero: Cash Pool + Countdown */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-slate-800/50 border border-slate-800/80 p-px">
-            <div className="bg-[var(--color-card-bg)] p-8 sm:p-12 relative overflow-hidden group">
-              <div className="absolute top-4 left-4 w-2 h-2 bg-neon-green rounded-full animate-pulse" />
+      <main className="relative z-10 flex-1 w-full py-6">
+        <div className="w-full max-w-6xl mx-auto px-6 sm:px-10 flex flex-col gap-6">
+
+          {/* ── Hero strip: Pool (left 55%) + Countdown (right 45%) ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-[55fr_45fr] border border-slate-800/70">
+            <div className="relative px-8 py-8 border-b lg:border-b-0 lg:border-r border-slate-800/70 bg-[var(--color-card-bg)]">
+              <div className="absolute top-4 right-4 w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse" />
               <CashPool total={totalPool} />
             </div>
-            <div className="bg-[var(--color-card-bg)] p-8 sm:p-12 flex items-center justify-center">
+            <div className="px-8 py-8 bg-[var(--color-card-bg)]">
               <CountdownTimer deadline={deadline} />
             </div>
           </div>
 
-          {/* Log Infraction — visible to all */}
+          {/* ── Log infraction — all users ── */}
           <LogInfraction groupId={activeGroup.id} participants={participants} />
 
-          {/* Admin Panel */}
+          {/* ── Admin panel ── */}
           <AnimatePresence>
             {isAdmin && (
               <AdminPanel
@@ -239,14 +240,16 @@ function App() {
             )}
           </AnimatePresence>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.6 }}>
+          {/* ── Bottom: leaderboard + feed ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-6 items-start pb-12">
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.5 }}>
               <Leaderboard participants={participants} />
             </motion.div>
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.6 }}>
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.5 }}>
               <EntryFeed entries={entries} />
             </motion.div>
           </div>
+
         </div>
       </main>
 

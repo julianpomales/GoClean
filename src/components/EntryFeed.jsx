@@ -5,68 +5,65 @@ function timeAgo(ts) {
   const now = Date.now()
   const then = ts.toMillis ? ts.toMillis() : new Date(ts).getTime()
   const diff = Math.floor((now - then) / 1000)
-  if (diff < 5) return 'JUST NOW'
-  if (diff < 60) return `${diff}S AGO`
-  if (diff < 3600) return `${Math.floor(diff / 60)}M AGO`
-  if (diff < 86400) return `${Math.floor(diff / 3600)}H AGO`
-  return `${Math.floor(diff / 86400)}D AGO`
+  if (diff < 5) return 'just now'
+  if (diff < 60) return `${diff}s ago`
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+  return `${Math.floor(diff / 86400)}d ago`
 }
 
+const PLACEHOLDER = [
+  { id: 'ph1', participantName: 'Alex', amount: 1, note: 'Spilled coffee', createdAt: { toMillis: () => Date.now() - 120000 } },
+  { id: 'ph2', participantName: 'Jordan', amount: 1, note: '', createdAt: { toMillis: () => Date.now() - 600000 } },
+  { id: 'ph3', participantName: 'Alex', amount: 1, note: 'Meeting interruption', createdAt: { toMillis: () => Date.now() - 3600000 } },
+  { id: 'ph4', participantName: 'Morgan', amount: 1, note: '', createdAt: { toMillis: () => Date.now() - 7200000 } },
+]
+
 export default function EntryFeed({ entries }) {
+  const isPlaceholder = entries.length === 0
+  const data = isPlaceholder ? PLACEHOLDER : entries
+
   return (
-    <div className="w-full">
-      <div className="flex items-center gap-4 mb-8">
-        <p className="font-mono text-xs uppercase tracking-widest text-slate-500 shrink-0">
-          [ RECENT_ACTIVITY ]
-        </p>
-        <div className="h-px w-full bg-slate-800" />
+    <div className="w-full flex flex-col h-full">
+      <div className="flex items-center justify-between mb-4">
+        <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-500">Recent Activity</span>
+        {isPlaceholder && (
+          <span className="font-mono text-[10px] text-slate-700 uppercase tracking-widest">SAMPLE DATA</span>
+        )}
       </div>
 
-      <div className="flex flex-col gap-px bg-slate-800/50 border border-slate-800/80 p-px">
+      <div className="flex flex-col divide-y divide-slate-800/60 border border-slate-800/60">
         <AnimatePresence initial={false}>
-          {entries.slice(0, 20).map((entry, i) => (
+          {data.slice(0, 20).map((entry, i) => (
             <motion.div
               key={entry.id}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: isPlaceholder ? 0.35 : 1, y: 0 }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
-              className="group bg-[var(--color-card-bg)] hover:bg-slate-900/50 transition-colors overflow-hidden"
+              transition={{ duration: 0.25, delay: i * 0.03 }}
+              className="group flex items-center gap-4 px-5 py-3.5 bg-[var(--color-card-bg)] hover:bg-slate-900/60 transition-colors"
             >
-              <div className="flex items-start gap-4 sm:gap-6 px-6 py-5">
-                <div className="w-8 h-8 flex items-center justify-center bg-red-500/10 text-red-500 font-mono text-sm shrink-0 border border-red-500/20">
-                  !
-                </div>
-                <div className="flex-1 min-w-0 flex flex-col justify-center min-h-[32px]">
-                  <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-3">
-                    <p className="font-display text-lg uppercase tracking-wider text-slate-200 truncate">
-                      {entry.participantName}
-                    </p>
-                    <span className="font-mono text-[10px] text-slate-500 tracking-widest shrink-0">
-                      [{timeAgo(entry.createdAt)}]
-                    </span>
-                  </div>
-                  {entry.note && (
-                    <p className="font-mono text-xs text-slate-400 mt-2 truncate max-w-sm">
-                      <span className="text-slate-600 mr-2">&gt;</span>"{entry.note}"
-                    </p>
-                  )}
-                </div>
-                <span className="font-mono text-lg text-red-400 shrink-0 flex items-center h-8">
-                  +${(entry.amount || 0).toFixed(0)}
-                </span>
+              {/* Icon */}
+              <div className="w-7 h-7 shrink-0 flex items-center justify-center border border-red-500/20 bg-red-500/5 text-red-400 font-mono text-xs">
+                !
               </div>
+
+              {/* Name + note */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-baseline gap-2">
+                  <p className="font-display text-sm uppercase tracking-wide text-slate-200 truncate">{entry.participantName}</p>
+                  <span className="font-mono text-[10px] text-slate-600 shrink-0">{timeAgo(entry.createdAt)}</span>
+                </div>
+                {entry.note && (
+                  <p className="font-mono text-[10px] text-slate-500 mt-0.5 truncate">&ldquo;{entry.note}&rdquo;</p>
+                )}
+              </div>
+
+              {/* Amount */}
+              <span className="font-mono text-sm font-bold text-red-400 shrink-0">+${(entry.amount || 0).toFixed(2)}</span>
             </motion.div>
           ))}
         </AnimatePresence>
-
-        {entries.length === 0 && (
-          <div className="bg-[var(--color-card-bg)] py-20 text-center">
-            <p className="font-mono text-xs uppercase tracking-widest text-slate-500">
-              [ NO_ACTIVITY_LOGGED ]
-            </p>
-          </div>
-        )}
       </div>
     </div>
   )
