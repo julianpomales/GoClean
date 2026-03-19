@@ -159,7 +159,8 @@ function App() {
         </div>
       </header>
 
-      <main className="relative z-10 flex-1 w-full max-w-5xl mx-auto py-4 flex flex-col gap-12">
+      <main className="relative z-10 flex-1 w-full py-4">
+        <div className="w-full max-w-5xl mx-auto px-6 sm:px-12 flex flex-col gap-12">
         {/* Hero: Cash Pool + Countdown */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-slate-800/50 border border-slate-800/80 p-px">
           <div className="bg-[var(--color-card-bg)] p-8 sm:p-12 relative overflow-hidden group">
@@ -201,6 +202,7 @@ function App() {
           >
             <EntryFeed entries={entries} />
           </motion.div>
+        </div>
         </div>
       </main>
 

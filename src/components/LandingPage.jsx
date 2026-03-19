@@ -15,7 +15,7 @@ export default function LandingPage({ onSignedIn }) {
       if (onSignedIn) onSignedIn()
     } catch (err) {
       if (err.code !== 'auth/popup-closed-by-user') {
-        setError('Sign-in failed. Please try again.')
+        setError(`Sign-in failed: ${err.code || err.message}`)
       }
     }
     setLoading(false)
