@@ -1,22 +1,32 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+function Digit({ value }) {
+  return (
+    <div className="relative w-[36px] h-[60px] sm:w-[44px] sm:h-[72px] flex items-center justify-center overflow-hidden border border-slate-800 bg-[var(--color-deep-bg)]">
+      <AnimatePresence mode="popLayout">
+        <motion.span
+          key={value}
+          initial={{ y: 24, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -24, opacity: 0 }}
+          transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="text-3xl sm:text-4xl font-mono text-white tracking-tighter absolute"
+        >
+          {value}
+        </motion.span>
+      </AnimatePresence>
+    </div>
+  )
+}
+
 function TimeUnit({ value, label }) {
+  const padded = String(value).padStart(2, '0')
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="relative w-[70px] h-[80px] sm:w-[90px] sm:h-[100px] flex items-center justify-center border border-slate-800 bg-[var(--color-deep-bg)] shadow-[4px_4px_0px_0px_rgba(255,255,255,0.02)]">
-        <AnimatePresence mode="popLayout">
-          <motion.span
-            key={value}
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -20, opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="text-4xl sm:text-5xl font-mono text-white tracking-tighter"
-          >
-            {String(value).padStart(2, '0')}
-          </motion.span>
-        </AnimatePresence>
+      <div className="flex gap-1">
+        <Digit value={padded[0]} />
+        <Digit value={padded[1]} />
       </div>
       <span className="font-mono text-[10px] uppercase tracking-widest text-slate-500">
         {label}
