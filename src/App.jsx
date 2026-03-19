@@ -59,30 +59,11 @@ function App() {
     return unsub
   }, [user])
 
-  // Subscribe to group's participants and entries when activeGroup is set
-  useEffect(() => {
-    if (!activeGroup) return
-    const pUnsub = onSnapshot(collection(db, 'groups', activeGroup.id, 'participants'), snap => {
-      setParticipants(snap.docs.map(d => ({ id: d.id, ...d.data() })))
-    })
-    const q = query(collection(db, 'groups', activeGroup.id, 'entries'), orderBy('createdAt', 'desc'))
-    const eUnsub = onSnapshot(q, snap => {
-      const newEntries = snap.docs.map(d => ({ id: d.id, ...d.data() }))
-      if (prevEntriesCount.current > 0 && newEntries.length > prevEntriesCount.current) {
-        setConfettiTrigger(t => t + 1)
-      }
-      prevEntriesCount.current = newEntries.length
-      setEntries(newEntries)
-    })
-    return () => { pUnsub(); eUnsub() }
-  }, [activeGroup])
-
   const upsertParticipant = async (groupId) => {
     if (!user) return
     const ref = doc(db, 'groups', groupId, 'participants', user.uid)
     const snap = await getDoc(ref)
     if (!snap.exists()) {
-      // New participant — write full record with defaults
       await setDoc(ref, {
         uid: user.uid,
         name: user.displayName || user.email.split('@')[0],
@@ -93,7 +74,6 @@ function App() {
         swearCount: 0,
       })
     } else {
-      // Returning user — only refresh profile fields, never touch rate/totalOwed/swearCount
       await setDoc(ref, {
         name: user.displayName || user.email.split('@')[0],
         photoURL: user.photoURL || null,
@@ -101,6 +81,32 @@ function App() {
       }, { merge: true })
     }
   }
+
+  // Subscribe to participants — separate from entries so index errors don't affect it
+  useEffect(() => {
+    if (!activeGroup) return
+    // Ensure current user is registered as a participant (catches pre-existing members)
+    upsertParticipant(activeGroup.id)
+    const pUnsub = onSnapshot(collection(db, 'groups', activeGroup.id, 'participants'), snap => {
+      setParticipants(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    })
+    return () => pUnsub()
+  }, [activeGroup]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Subscribe to entries separately
+  useEffect(() => {
+    if (!activeGroup) return
+    const q = query(collection(db, 'groups', activeGroup.id, 'entries'), orderBy('createdAt', 'desc'))
+    const eUnsub = onSnapshot(q, snap => {
+      const newEntries = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      if (prevEntriesCount.current > 0 && newEntries.length > prevEntriesCount.current) {
+        setConfettiTrigger(t => t + 1)
+      }
+      prevEntriesCount.current = newEntries.length
+      setEntries(newEntries)
+    }, err => console.warn('Entries subscription error (index may be building):', err))
+    return () => eUnsub()
+  }, [activeGroup])
 
   const handleSelectGroup = async (group) => {
     setActiveGroup(group)
