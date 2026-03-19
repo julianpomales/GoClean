@@ -22,7 +22,7 @@ export default function LandingPage({ onSignedIn }) {
   }
 
   return (
-    <div className="min-h-screen bg-grain flex flex-col relative overflow-hidden">
+    <div className="min-h-screen bg-grain flex flex-col relative overflow-hidden px-4 sm:px-8">
       {/* Structural grid lines */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.03]">
         <div className="absolute top-0 bottom-0 left-1/4 w-px bg-white" />
@@ -31,7 +31,7 @@ export default function LandingPage({ onSignedIn }) {
       </div>
 
       {/* Nav */}
-      <nav className="relative z-10 w-full px-8 py-8 flex items-center justify-between">
+      <nav className="relative z-10 w-full max-w-[1400px] mx-auto py-8 flex items-center justify-between">
         <div className="font-display font-bold text-xl tracking-tighter uppercase flex items-center gap-3">
           <span className="text-2xl">🧼</span> GOCLEAN
         </div>
@@ -45,39 +45,39 @@ export default function LandingPage({ onSignedIn }) {
       </nav>
 
       {/* Hero */}
-      <div className="flex-1 flex flex-col items-center justify-center px-6 relative z-10">
+      <div className="flex-1 flex flex-col items-center justify-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-4xl text-center"
+          className="w-full max-w-4xl flex flex-col items-center text-center"
         >
           {/* Badge */}
-          <div className="inline-flex items-center gap-3 mb-16 px-4 py-2 border border-slate-800 bg-[#121214] font-mono text-[10px] uppercase tracking-widest text-slate-400">
+          <div className="inline-flex items-center justify-center gap-3 mb-16 px-4 py-2 border border-slate-800 bg-[#121214] font-mono text-[10px] uppercase tracking-widest text-slate-400">
             <span className="w-1.5 h-1.5 bg-neon-green rounded-full animate-pulse" />
             LIVE LEDGER SYSTEM
           </div>
 
           {/* Title */}
-          <h1 className="font-display font-black text-6xl sm:text-8xl md:text-[9rem] leading-[0.85] tracking-tighter mb-10 text-white uppercase">
+          <h1 className="font-display font-black text-6xl sm:text-8xl md:text-[9rem] leading-[0.85] tracking-tighter mb-10 text-white uppercase text-center w-full">
             KEEP IT
             <br />
             <span className="text-neon block mt-2">CLEAN.</span>
           </h1>
 
           {/* Subtitle */}
-          <p className="font-mono text-sm sm:text-base text-slate-400 leading-relaxed mb-20 max-w-xl mx-auto uppercase tracking-wide">
+          <p className="font-mono text-sm sm:text-base text-slate-400 leading-relaxed mb-20 max-w-xl text-center uppercase tracking-wide">
             Track every infraction. Watch the pool grow. 
             <br className="hidden sm:block" />
             No mercy. Real-time accountability.
           </p>
 
           {/* CTA */}
-          <div className="flex flex-col items-center gap-6">
+          <div className="flex flex-col items-center gap-6 w-full">
             <button
               onClick={handleGoogleSignIn}
               disabled={loading}
-              className="btn-brutal flex items-center gap-4"
+              className="btn-brutal flex items-center justify-center gap-4"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="currentColor"/>
@@ -89,7 +89,7 @@ export default function LandingPage({ onSignedIn }) {
             </button>
 
             {error && (
-              <p className="font-mono text-red-500 text-xs uppercase tracking-widest bg-red-500/10 px-4 py-2 border border-red-500/20">
+              <p className="font-mono text-red-500 text-xs uppercase tracking-widest bg-red-500/10 px-4 py-2 border border-red-500/20 text-center">
                 {error}
               </p>
             )}
@@ -98,7 +98,7 @@ export default function LandingPage({ onSignedIn }) {
       </div>
 
       {/* Footer */}
-      <footer className="relative z-10 w-full px-8 py-8 flex items-center justify-between border-t border-slate-800/50 mt-20">
+      <footer className="relative z-10 w-full max-w-[1400px] mx-auto py-8 flex items-center justify-between border-t border-slate-800/50 mt-10 sm:mt-20">
         <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
           GOCLEAN VERSION 1.0.0
         </span>

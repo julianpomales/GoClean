@@ -104,7 +104,7 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-grain text-slate-200 font-sans selection:bg-neon-green selection:text-black">
+    <div className="min-h-screen bg-grain text-slate-200 font-sans selection:bg-neon-green selection:text-black flex flex-col px-4 sm:px-8">
       <Confetti trigger={confettiTrigger} />
 
       <AnimatePresence>
@@ -117,52 +117,49 @@ function App() {
         )}
       </AnimatePresence>
 
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-[var(--color-deep-bg)]/80 backdrop-blur-xl border-b border-slate-800/80">
-        <div className="w-full max-w-5xl mx-auto px-6 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <span className="text-2xl hidden sm:block">🧼</span>
-            <div>
-              <h1 className="font-display font-black text-xl tracking-tight uppercase leading-none">GOCLEAN</h1>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-slate-500 mt-1">
-                OPERATOR: {user.displayName || user.email}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handleAdminClick}
-              className={`font-mono text-xs uppercase tracking-widest transition-colors ${
-                isAdmin ? 'text-neon-green' : 'text-slate-500 hover:text-white'
-              }`}
-            >
-              [{isAdmin ? 'ADMIN ACTIVE' : 'AUTH ADMIN'}]
-            </button>
-            <button onClick={handleSignOut} title="Sign out" className="group relative">
-              {user.photoURL ? (
-                <img
-                  src={user.photoURL}
-                  alt="User"
-                  className="w-10 h-10 rounded-none border border-slate-800 group-hover:border-neon-green transition-colors grayscale group-hover:grayscale-0"
-                />
-              ) : (
-                <div className="w-10 h-10 bg-slate-800 flex items-center justify-center font-mono text-xs text-slate-400 group-hover:text-neon-green transition-colors">
-                  ESC
-                </div>
-              )}
-            </button>
-          </div>
-        </div>
-      </header>
-
       {/* Grid Lines Overlay */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.02] z-0">
         <div className="absolute top-0 bottom-0 left-1/2 w-px bg-white" />
         <div className="w-full max-w-5xl mx-auto h-full border-x border-white" />
       </div>
 
-      <main className="relative z-10 w-full max-w-5xl mx-auto px-6 py-12 flex flex-col gap-12">
+      {/* Header */}
+      <header className="relative z-40 w-full max-w-[1400px] mx-auto py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <span className="text-3xl hidden sm:block">🧼</span>
+          <div>
+            <h1 className="font-display font-black text-2xl tracking-tight uppercase leading-none">GOCLEAN</h1>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-slate-500 mt-2">
+              OPERATOR: {user.displayName || user.email}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end border-t border-slate-800/50 sm:border-0 pt-4 sm:pt-0">
+          <button
+            onClick={handleAdminClick}
+            className={`font-mono text-xs uppercase tracking-widest transition-colors ${
+              isAdmin ? 'text-neon-green' : 'text-slate-500 hover:text-white'
+            }`}
+          >
+            [{isAdmin ? 'ADMIN ACTIVE' : 'AUTH ADMIN'}]
+          </button>
+          <button onClick={handleSignOut} title="Sign out" className="group relative shrink-0">
+            {user.photoURL ? (
+              <img
+                src={user.photoURL}
+                alt="User"
+                className="w-10 h-10 rounded-none border border-slate-800 group-hover:border-neon-green transition-colors grayscale group-hover:grayscale-0"
+              />
+            ) : (
+              <div className="w-10 h-10 bg-[var(--color-card-bg)] border border-slate-800 flex items-center justify-center font-mono text-xs text-slate-400 group-hover:text-neon-green group-hover:border-neon-green transition-colors">
+                ESC
+              </div>
+            )}
+          </button>
+        </div>
+      </header>
 
+      <main className="relative z-10 flex-1 w-full max-w-5xl mx-auto py-4 flex flex-col gap-12">
         {/* Hero: Cash Pool + Countdown */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-px bg-slate-800/50 border border-slate-800/80 p-px">
           <div className="bg-[var(--color-card-bg)] p-8 sm:p-12 relative overflow-hidden group">
@@ -186,7 +183,7 @@ function App() {
           )}
         </AnimatePresence>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start mt-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-start mt-4">
           {/* Leaderboard */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -205,12 +202,16 @@ function App() {
             <EntryFeed entries={entries} />
           </motion.div>
         </div>
-
-        <footer className="mt-20 py-8 border-t border-slate-800/50 flex items-center justify-between text-slate-600 font-mono text-[10px] uppercase tracking-widest">
-          <span>GOCLEAN VERSION 1.0.0</span>
-          <span>KEEP IT CLEAN 🧼</span>
-        </footer>
       </main>
+
+      <footer className="relative z-10 w-full max-w-[1400px] mx-auto py-8 flex items-center justify-between border-t border-slate-800/50 mt-10 sm:mt-20">
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
+          GOCLEAN VERSION 1.0.0
+        </span>
+        <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-slate-500">
+          KEEP IT CLEAN 🧼
+        </span>
+      </footer>
     </div>
   )
 }
