@@ -18,13 +18,13 @@ function AnimatedDollar({ value }) {
 
 export default function CashPool({ total }) {
   return (
-    <div className="flex flex-col justify-center h-full py-8 px-2">
-      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-500 mb-4">
+    <div className="flex flex-col items-center justify-center w-full h-full py-10">
+      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500 mb-6">
         TOTAL POOL
       </p>
-      <div className="flex items-baseline gap-2">
-        <span className="text-neon-green text-2xl font-mono leading-none select-none">$</span>
-        <span className="text-[4.5rem] sm:text-[6rem] font-mono font-bold leading-none tracking-tighter text-white">
+      <div className="flex items-baseline gap-3">
+        <span className="text-neon-green text-3xl sm:text-4xl font-mono leading-none select-none pb-2">$</span>
+        <span className="text-[6rem] sm:text-[9rem] lg:text-[11rem] font-mono font-bold leading-none tracking-tighter text-white">
           <AnimatedDollar value={total} />
         </span>
       </div>
@@ -32,7 +32,7 @@ export default function CashPool({ total }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="mt-5 flex items-center gap-2"
+        className="mt-6 flex items-center gap-2"
       >
         <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${total > 0 ? 'bg-red-400 animate-pulse' : 'bg-slate-700'}`} />
         <p className="font-mono text-[10px] uppercase tracking-widest text-slate-500">

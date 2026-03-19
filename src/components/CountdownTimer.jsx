@@ -78,9 +78,9 @@ export default function CountdownTimer({ deadline }) {
 
   if (!deadline) {
     return (
-      <div className="text-center w-full">
-        <div className="font-mono text-xs uppercase tracking-widest text-slate-500 mb-4">[ TIMER_OFFLINE ]</div>
-        <p className="font-display text-2xl text-slate-600">AWAITING TARGET DATE</p>
+      <div className="flex flex-col items-center gap-3 w-full">
+        <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500">TIME REMAINING</p>
+        <p className="font-mono text-sm text-slate-700 uppercase tracking-widest">NO DEADLINE SET</p>
       </div>
     )
   }
@@ -103,8 +103,8 @@ export default function CountdownTimer({ deadline }) {
   }
 
   return (
-    <div className="flex flex-col justify-center h-full py-8 px-2">
-      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-slate-500 mb-4">
+    <div className="flex flex-col items-center justify-center w-full gap-5">
+      <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-slate-500">
         TIME REMAINING
       </p>
       <div className="flex items-start gap-2 sm:gap-3">

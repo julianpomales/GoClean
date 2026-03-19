@@ -213,13 +213,15 @@ function App() {
       <main className="relative z-10 flex-1 w-full py-6">
         <div className="w-full max-w-6xl mx-auto px-6 sm:px-10 flex flex-col gap-6">
 
-          {/* ── Hero strip: Pool (left 55%) + Countdown (right 45%) ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-[55fr_45fr] border border-slate-800/70">
-            <div className="relative px-8 py-8 border-b lg:border-b-0 lg:border-r border-slate-800/70 bg-[var(--color-card-bg)]">
-              <div className="absolute top-4 right-4 w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse" />
-              <CashPool total={totalPool} />
+          {/* ── Hero: big centered dollar + countdown underneath ── */}
+          <div className="relative w-full border border-slate-800/70 bg-[var(--color-card-bg)] flex flex-col items-center justify-center px-8 py-10 gap-8 overflow-hidden">
+            <div className="absolute top-4 right-4 w-1.5 h-1.5 rounded-full bg-neon-green animate-pulse" />
+            <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
+              <div className="absolute top-0 bottom-0 left-1/2 w-px bg-white" />
+              <div className="absolute left-0 right-0 top-1/2 h-px bg-white" />
             </div>
-            <div className="px-8 py-8 bg-[var(--color-card-bg)]">
+            <CashPool total={totalPool} />
+            <div className="w-full border-t border-slate-800/60 pt-8">
               <CountdownTimer deadline={deadline} />
             </div>
           </div>

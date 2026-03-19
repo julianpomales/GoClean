@@ -51,13 +51,19 @@ export default function LogInfraction({ groupId, participants }) {
 
       <form onSubmit={handleSubmit} className="p-6 flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
-          <label className={labelCls}>TARGET</label>
-          <select value={selectedId} onChange={e => setSelectedId(e.target.value)} className={inputCls}>
-            <option value="">[ SELECT INDIVIDUAL ]</option>
-            {participants.map(p => (
-              <option key={p.id} value={p.id}>{p.name} — ${p.rate}/INFRACTION</option>
-            ))}
-          </select>
+          <label className={labelCls}>WHO SWORE?</label>
+          {participants.length === 0 ? (
+            <div className={`${inputCls} text-slate-600 flex items-center`}>
+              [ ADD PEOPLE VIA ADMIN PANEL FIRST ]
+            </div>
+          ) : (
+            <select value={selectedId} onChange={e => setSelectedId(e.target.value)} className={inputCls}>
+              <option value="">[ SELECT PERSON ]</option>
+              {participants.map(p => (
+                <option key={p.id} value={p.id}>{p.name} — ${(p.rate || 1).toFixed(2)}/infraction</option>
+              ))}
+            </select>
+          )}
         </div>
         <div className="flex-1">
           <label className={labelCls}>DETAILS (OPTIONAL)</label>
