@@ -23,9 +23,9 @@ export default function CashPool({ total }) {
         [ POOL_TOTAL ]
       </p>
 
-      <div className="flex items-start justify-center">
-        <span className="text-neon-green text-4xl sm:text-6xl font-mono mt-4 mr-2 select-none">$</span>
-        <span className="text-[5rem] sm:text-[8rem] md:text-[10rem] font-display font-black leading-none tracking-tighter text-white">
+      <div className="flex items-baseline justify-center">
+        <span className="text-neon-green text-3xl sm:text-4xl font-mono mr-2 select-none">$</span>
+        <span className="text-[5rem] sm:text-[7rem] md:text-[9rem] font-mono font-bold leading-none tracking-tighter text-white">
           <AnimatedDollar value={total} />
         </span>
       </div>
