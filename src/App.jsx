@@ -286,17 +286,19 @@ function App() {
             [{isAdmin ? 'ADMIN ACTIVE' : 'AUTH ADMIN'}]
           </button>
           <button onClick={handleSignOut} title="Sign out" className="group relative shrink-0">
-            {user.photoURL ? (
-              <img
-                src={user.photoURL}
-                alt="User"
-                className="w-10 h-10 rounded-none border border-slate-800 group-hover:border-neon-green transition-colors grayscale group-hover:grayscale-0"
-              />
-            ) : (
+            <div className="relative w-10 h-10">
+              {user.photoURL?.trim() && (
+                <img
+                  src={user.photoURL}
+                  alt=""
+                  className="absolute inset-0 w-10 h-10 rounded-none border border-slate-800 group-hover:border-neon-green transition-colors grayscale group-hover:grayscale-0 object-cover"
+                  onError={e => { e.currentTarget.style.display = 'none' }}
+                />
+              )}
               <div className="w-10 h-10 bg-[var(--color-card-bg)] border border-slate-800 flex items-center justify-center font-display font-bold text-sm text-slate-400 group-hover:text-neon-green group-hover:border-neon-green transition-colors">
                 {(user.displayName || user.email || '?')[0].toUpperCase()}
               </div>
-            )}
+            </div>
           </button>
         </div>
       </header>
